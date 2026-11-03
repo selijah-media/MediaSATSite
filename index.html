@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Media 12 SAT Inspiration</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1c2239;--blue:#4799d4;--yellow:#f7c85a;--paper:#fbfaf7;--ink:#1c2239;--card:#fff;--line:#d9d6cc;--mute:#5d6176;--ac:#fb5f45;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#12152a;--ink:#f3f1ea;--card:#1c2239;--line:#343a58;--mute:#a9adc4}}
+:root[data-theme="dark"]{--paper:#12152a;--ink:#f3f1ea;--card:#1c2239;--line:#343a58;--mute:#a9adc4}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--paper);color:var(--ink);font:16px/1.45 'DM Sans',system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+h1,h2,.brand,.pill{font-family:'Fredoka','DM Sans',system-ui,sans-serif}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+header{flex:none;height:54px;background:var(--navy);color:#fff;display:flex;align-items:center;gap:6px;padding:0 14px;padding-top:env(safe-area-inset-top,0px);box-sizing:content-box}
+body.home header{display:none}
+.brand{font-weight:700;font-size:19px;margin-right:10px;display:flex;align-items:center;gap:8px}
+.brand b{background:var(--yellow);color:var(--navy);padding:1px 9px;border-radius:6px}
+header nav{display:flex;gap:4px;overflow-x:auto}
+header nav a{display:flex;align-items:center;gap:7px;padding:6px 12px;border-radius:99px;font-weight:500;font-size:14px;white-space:nowrap;border:2px solid transparent}
+header nav a i{width:11px;height:11px;border-radius:3px;background:var(--c)}
+header nav a:hover{background:rgba(255,255,255,.12)}
+header nav a.on{border-color:var(--c);background:rgba(255,255,255,.1)}
+#app{flex:1;min-height:0}
+/* home */
+.homewrap{height:100%;display:grid;place-items:center;background:#fbfaf7}
+.logo{position:relative;width:min(100vw,150dvh);aspect-ratio:3/2}
+.logo img{width:100%;height:100%;display:block;user-select:none}
+.panel{position:absolute;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:background .15s,transform .15s}
+.panel:hover,.panel:focus-visible{background:rgba(255,255,255,.22);transform:scale(1.025);outline:4px solid var(--navy);outline-offset:-4px}
+.pill{background:var(--navy);color:#fff;font-weight:700;font-size:clamp(13px,2.3vw,34px);padding:.1em .8em;border-radius:99px;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+.panel:hover .pill,.panel:focus-visible .pill{background:var(--ac);color:var(--navy)}
+/* sub pages */
+.sub{height:100%;display:grid;grid-template-columns:272px 1fr;min-height:0}
+aside{background:var(--card);border-right:2px solid var(--line);padding:18px 14px;overflow-y:auto}
+aside h1{margin:0 0 2px;font-size:30px;line-height:1.1}
+aside h1::after{content:"";display:block;height:6px;width:64px;background:var(--ac);border-radius:6px;margin:8px 0 14px}
+aside a{display:block;padding:9px 12px;border-radius:10px;margin-bottom:4px;border:2px solid transparent}
+aside a b{display:block;font-size:15px}aside a span{display:block;font-size:12.5px;color:var(--mute);line-height:1.3}
+aside a:hover{background:var(--paper)}
+aside a.on{background:var(--ac);color:#1c2239}aside a.on span{color:#1c2239;opacity:.85}
+aside a.sm{margin-left:16px;padding:6px 12px}
+.pane{display:flex;flex-direction:column;min-width:0;min-height:0;padding:14px 18px 16px}
+.pane h2{margin:0 0 10px;font-size:22px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.pane h2 small{font:400 14px 'DM Sans',sans-serif;color:var(--mute)}
+.empty{flex:1;display:grid;place-content:center;text-align:center;border:3px dashed var(--ac);border-radius:18px;padding:30px;gap:8px;color:var(--mute)}
+.empty big{font-size:54px;line-height:1}.empty p{margin:0;max-width:44ch}.empty strong{color:var(--ink);font-family:Fredoka,sans-serif;font-size:20px}
+/* viewer */
+.viewer{flex:1;min-height:0;display:flex;flex-direction:column;border:2px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
+.bar{flex:none;display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--navy);color:#fff;flex-wrap:wrap}
+.bar button{background:rgba(255,255,255,.14);border:0;border-radius:8px;padding:4px 12px;min-width:36px;font-weight:700}
+.bar button:hover{background:var(--yellow);color:var(--navy)}
+.bar button.on{background:var(--blue)}
+.bar span{min-width:64px;text-align:center;font-size:14px}.bar i{flex:1}
+.wrap{position:relative;flex:1;min-height:0;background:#e7e4da}
+.stage{position:absolute;inset:0;overflow:auto;display:flex;cursor:grab}
+.stage:active{cursor:grabbing}
+.stage .pg{margin:auto;flex:none;position:relative;box-shadow:0 3px 14px rgba(0,0,0,.25)}
+.stage img,.stage video{display:block;width:100%;background:#fff;-webkit-user-drag:none}
+.stage video{background:#000}
+.stage iframe{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}.stage iframe[hidden]{display:none}.stage img[hidden],.stage video[hidden]{display:none}
+.hl{position:absolute;background:rgba(247,200,90,.3);border-bottom:3px solid var(--yellow);border-radius:3px;cursor:pointer}
+.hl:hover{background:rgba(71,153,212,.35)}
+.wb{position:absolute;inset:0;overflow:hidden;background:#fff}
+.wb iframe{border:0;transform-origin:0 0;display:block}
+.viewer.isweb .d,.viewer:not(.isweb) .w{display:none!important}
+.bar a.nt{background:rgba(255,255,255,.14);border-radius:8px;padding:4px 12px;font-weight:700;font-size:14px}
+.bar a.nt:hover{background:var(--yellow);color:var(--navy)}
+.side{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:44px;height:64px;border:0;border-radius:12px;background:var(--navy);color:#fff;font-size:30px;opacity:.82}
+.side:hover{background:var(--ac);color:var(--navy);opacity:1}.side.l{left:10px}.side.r{right:26px}
+/* inspiration viewer */
+.iv{flex:1;min-height:0;display:flex;flex-direction:column;gap:10px}
+.itop{display:flex;gap:10px;align-items:center;flex:none;flex-wrap:wrap}
+.itop .go{border:0;border-radius:99px;padding:12px 30px;font:700 22px Fredoka,'DM Sans',sans-serif;background:var(--ac);color:#1c2239;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.itop .go:active{transform:translateY(3px);box-shadow:none}
+.itop .pv{border:0;border-radius:99px;padding:9px 16px;font-weight:700;background:var(--navy);color:#fff}.itop .pv:disabled{opacity:.4;cursor:default}
+.rc{color:var(--mute);font-size:14px}
+.q{margin-left:auto;border:2px solid var(--line);border-radius:99px;padding:6px 14px;background:var(--card);color:var(--ink);font:inherit;font-size:14px;width:230px;max-width:100%}
+.ibody{flex:1;min-height:0;display:grid;grid-template-columns:230px 1fr;gap:14px}
+.ifilter{overflow:auto;border:2px solid var(--line);border-radius:14px;background:var(--card);padding:8px}
+.ifilter h4{margin:8px 6px 4px;font:700 12px 'DM Sans',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.ifilter button{display:flex;justify-content:space-between;gap:8px;width:100%;text-align:left;border:0;background:none;padding:6px 10px;border-radius:8px;font-size:14px}
+.ifilter button:hover{background:var(--paper)}
+.ifilter button.on{background:var(--ac);color:#1c2239;font-weight:700}
+.ifilter button.s{padding-left:24px;font-size:13px}.ifilter button:disabled{opacity:.4;cursor:default}
+.ifilter button i{font-style:normal;color:var(--mute);font-size:12px}.ifilter button.on i{color:#1c2239}
+.imain{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:0}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex:none}
+.tags .tt{font:700 18px Fredoka,'DM Sans',sans-serif;margin-right:6px}
+.tags span:not(.tt){background:var(--navy);color:#fff;border-radius:99px;padding:2px 12px;font-size:13px;font-weight:700}
+.istage{flex:1;min-height:0;position:relative;background:#111;border-radius:14px;overflow:hidden}
+.istage>*{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:contain}
+.istage>.viewer{border-radius:0;border:0}
+.aud{display:grid;place-content:center;justify-items:center;gap:10px;color:#fff;text-align:center;padding:20px}.aud big{font-size:60px}
+.aud .dl{background:var(--yellow);color:var(--navy);padding:8px 18px;border-radius:99px;font-weight:700}
+.istrip{flex:none;display:flex;gap:8px;overflow-x:auto;padding:3px 3px 5px}
+.sc{flex:none;width:150px;border:2px solid var(--line);border-radius:10px;background:var(--card);padding:0;overflow:hidden;text-align:left}
+.sc.on{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+.sc .th{position:relative;aspect-ratio:16/9;background:var(--navy);display:grid;place-items:center;font-size:22px}
+.sc .th img,.sc .th video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sc .bd{position:absolute;right:4px;bottom:4px;background:rgba(0,0,0,.7);color:#fff;font-size:11px;padding:1px 6px;border-radius:6px;z-index:1}
+.sc .ttl{display:block;padding:4px 8px;font-size:12.5px;line-height:1.25;height:2.7em;overflow:hidden}
+.nohead>h2{display:none}
+.sc .th{aspect-ratio:auto!important;height:34px}
+.ifilter details{border:2px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden}
+.ifilter summary{cursor:pointer;padding:9px 12px;font:700 15px Fredoka,'DM Sans',sans-serif;display:flex;align-items:center;list-style:none;background:var(--paper)}
+.ifilter summary::-webkit-details-marker{display:none}
+.ifilter summary::before{content:'▸';margin-right:8px;color:var(--ac)}
+.ifilter details[open]>summary::before{content:'▾'}
+.ifilter summary i{margin-left:auto;font-style:normal;font-weight:400;color:var(--mute);font-size:12px}
+.ifilter details>div{padding:4px}
+.ifilter button.s2{padding-left:38px;font-size:12.5px}
+.aud .tv{background:transparent;border:2px solid #fff;color:#fff;border-radius:99px;padding:6px 16px;font-weight:700}
+.sc .th em{position:absolute;bottom:3px;left:5px;right:5px;font-size:10.5px;color:#fff;opacity:.85;font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.aud span{max-width:44ch;opacity:.85}
+@media(max-width:760px){.ibody{grid-template-columns:1fr;grid-template-rows:150px 1fr}}
+.grid{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-content:start}
+.card{border:2px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card)}
+.card .m{aspect-ratio:16/9;background:var(--navy);display:grid;place-items:center;color:#fff}
+.card .m img,.card .m video,.card .m iframe{width:100%;height:100%;object-fit:contain;border:0;background:#000}
+.card .m button{width:100%;height:100%;background:var(--navy);border:0;font-size:46px;color:var(--yellow)}
+.card p{margin:0;padding:9px 12px;font-weight:500}
+@media(max-width:760px){.sub{grid-template-columns:1fr;grid-template-rows:auto 1fr}aside{border-right:0;border-bottom:2px solid var(--line);display:flex;gap:6px;overflow-x:auto;padding:8px}aside h1{display:none}aside a{flex:none;margin:0}aside a.sm{margin-left:0}aside a span{display:none}body{overflow:auto}}
+</style></head><body>
+<header><a class="brand" href="#home" aria-label="Home"><b>Media</b> Year 12</a><nav id="nav"></nav></header>
+<main id="app"></main>
+<script src="assets/data.js"></script>
+<script src="assets/inspiration.js"></script>
+<script>
+const LOGO="assets/logo.jpg";
+const NOEMBED=["studiobinder.com","metrotrains.com.au","youtube.com","starnow.com"];
+const packs=()=>[
+ {k:'in',t:'Inspiration',s:'Videos and images',inspo:[]},
+ {k:'p1',t:'SAT Pack 1',s:'U3 AOS 2 Research, Development and Experimentation',pages:[]},
+ {k:'s1',t:'Student Samples',s:'For Pack 1',sm:1,pages:[]},
+ {k:'p2',t:'SAT Pack 2',s:'U3 AOS 3 Pre-production Planning',pages:[]},
+ {k:'s2',t:'Student Samples',s:'For Pack 2',sm:1,pages:[]},
+ {k:'p3',t:'SAT Pack 3',s:'U4 AOS 1 Media Production',pages:[]},
+ {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,pages:[]}];
+/* To add content later: put image/page sources in `pages` (PDF pages as images) or items in `inspo`,
+   e.g. {type:'video',src:'https://youtu.be/…',title:'…'} or {type:'image',src:'…',title:'…'} */
+const PAGES={
+ sat:{n:'The SAT',c:'#fb5f45',tabs:[
+  {k:'sd',t:'VCE Media Study Design',s:'Units 3 and 4, pages 26–36',pages:SD},
+  {k:'cs',t:'Constraints of the SAT',s:'What you can and can’t do',pages:CS},
+  {k:'cr',t:'SAT Criteria',s:'PDF coming soon',pages:[]},
+  {k:'eq',t:'Equipment Catalogue',s:'Canva catalogue',web:'https://www.canva.com/design/DAHPygjWsvU/siDFrwDVjBWRnxNtUVFXeQ/view?embed'},
+  {k:'in',t:'Inspirations',s:'Random pick from every media form',inspo:[]}]},
+ video:{n:'Video',c:'#eea857',tabs:packs()},
+ animation:{n:'Animation',c:'#f7c85a',tabs:packs()},
+ print:{n:'Print',c:'#8667b4',tabs:packs()},
+ audio:{n:'Audio',c:'#4799d4',tabs:packs()},
+ photography:{n:'Photography',c:'#55c0b0',tabs:packs()}};
+const $=(s,r=document)=>r.querySelector(s);
+const el=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e};
+$('#nav').innerHTML=Object.entries(PAGES).map(([k,p])=>`<a href="#${k}" data-p="${k}" style="--c:${p.c}"><i></i>${p.n}</a>`).join('');
+
+let activeViewer=null;
+document.addEventListener('keydown',e=>{if(!activeViewer)return;if(e.key==='ArrowRight')activeViewer.go(1);if(e.key==='ArrowLeft')activeViewer.go(-1)});
+
+function viewer(pages,web,openUrl,onBack){
+ pages=pages.map(p=>typeof p==='string'?{s:p,l:[]}:p);
+ let i=0,mode='page',rel=1,w=web||null,wz=1,moved=0,ou=openUrl;
+ const v=el('div','viewer',`<div class="bar"><button class="w bk" data-a="back">← Back to document</button><button class="d" data-a="prev" aria-label="Previous page">‹</button><span class="ct d"></span><button class="d" data-a="next" aria-label="Next page">›</button><i></i><button data-a="out" aria-label="Zoom out">−</button><span class="zl"></span><button data-a="in" aria-label="Zoom in">+</button><button data-a="page">Fit page</button><button class="d" data-a="width">Fit width</button><a class="nt w" target="_blank" rel="noopener">Open in new tab ↗</a></div><div class="wrap"><div class="stage d"><div class="pg"><img alt="Page"></div></div><div class="wb w"></div><button class="side l d" data-a="prev" aria-label="Previous page">‹</button><button class="side r d" data-a="next" aria-label="Next page">›</button></div>`);
+ const img=$('img',v),st=$('.stage',v),pg=$('.pg',v),fr=el('iframe'),vid=el('video');vid.controls=true;vid.playsInline=true;vid.hidden=true;pg.append(vid);const isVid=s=>/\.(mp4|mov|webm|m4v)$/i.test(s.split('?')[0]);const dfr=el('iframe');dfr.hidden=true;dfr.allow='autoplay; fullscreen';dfr.allowFullscreen=true;dfr.title='Video';pg.append(dfr);const isFrame=s=>/drive\.google\.com\/file\/d\/[^/]+\/preview/.test(s);fr.title='Embedded website';fr.allow='fullscreen';$('.wb',v).append(fr);
+ function draw(){if(!pages.length)return;vid.pause();const pf=isFrame(pages[i].s),pv=!pf&&isVid(pages[i].s);img.hidden=pf||pv;vid.hidden=!pv;dfr.hidden=!pf;if(pf)dfr.src=pages[i].s;else{dfr.removeAttribute('src');if(pv)vid.src=pages[i].s;else img.src=pages[i].s}if(pf)apply();pg.querySelectorAll('.hl').forEach(x=>x.remove());
+  (pages[i].l||[]).forEach(([x,y,ww,h,t])=>{const a=el('a','hl');a.style.cssText=`left:${x}%;top:${y}%;width:${ww}%;height:${h}%`;a.dataset.t=t;a.href=typeof t==='string'?t:'#';a.title=typeof t==='string'?t:'Go to page '+(t+1);pg.append(a)})}
+ function apply(){
+  v.classList.toggle('isweb',!!w);
+  if(w){if(fr.dataset.u!==w){fr.src=fr.dataset.u=w}
+   fr.style.cssText=`width:${100/wz}%;height:${100/wz}%;transform:scale(${wz})`;
+   $('.zl',v).textContent=Math.round(wz*100)+'%';$('.nt',v).href=ou||w.replace('?embed','');$('.bk',v).hidden=!pages.length&&!onBack;
+   $('[data-a=page]',v).classList.toggle('on',wz===1);return}
+  const frm=!dfr.hidden,cv=vid.hidden?img:vid,nw=frm?1600:((cv===vid?vid.videoWidth:img.naturalWidth)||1),nh=frm?900:((cv===vid?vid.videoHeight:img.naturalHeight)||1),sw=st.clientWidth-4,sh=st.clientHeight-4;
+  if(sw<=0)return;const fp=Math.min(sw/nw,sh/nh),fw=sw/nw;
+  const s=mode==='page'?fp:mode==='width'?fw:fp*rel;rel=s/fp;pg.style.width=nw*s+'px';
+  $('.ct',v).textContent=`${i+1} / ${pages.length}`;$('.zl',v).textContent=Math.round(rel*100)+'%';
+  v.querySelectorAll('[data-a=page],[data-a=width]').forEach(b=>b.classList.toggle('on',b.dataset.a===mode));
+ }
+ function go(d){if(w)return;const n=Math.min(pages.length-1,Math.max(0,i+d));if(n===i)return;i=n;draw();st.scrollTo(0,0)}
+ v.go=go;
+ v.onclick=e=>{
+  const hl=e.target.closest('.hl');
+  if(hl){e.preventDefault();if(moved)return;const t0=hl.dataset.t,t=t0.replace(/^http:/,'https:');if(/^\d+$/.test(t)){i=+t;draw();st.scrollTo(0,0);apply()}else if(embedUrl(t)){w=embedUrl(t);ou=t;wz=1;apply()}else if(!canEmbed(t)&&!canEmbed(t0)){window.open(t,'_blank','noopener')}else{w=gEmbed(t);ou=t;wz=1;apply()}return}
+  const a=e.target.closest('[data-a]')?.dataset.a;if(!a)return;
+  if(a==='prev')go(-1);else if(a==='next')go(1);
+  else if(a==='back'){if(!pages.length&&onBack){onBack();return}w=null;fr.dataset.u='';fr.src='about:blank';apply()}
+  else if(w){wz=a==='page'?1:Math.min(3,Math.max(.4,wz*(a==='in'?1.25:.8)));apply()}
+  else if(a==='page'||a==='width'){mode=a;apply();st.scrollTo(0,0)}
+  else{mode='zoom';rel=Math.min(6,Math.max(.4,rel*(a==='in'?1.25:.8)));apply()}};
+ img.onload=apply;vid.onloadedmetadata=apply;draw();apply();new ResizeObserver(apply).observe(st);
+ let d=null;
+ st.onpointerdown=e=>{moved=0;d={x:e.clientX,y:e.clientY,l:st.scrollLeft,t:st.scrollTop}};
+ st.onpointermove=e=>{if(!d)return;if(Math.abs(e.clientX-d.x)+Math.abs(e.clientY-d.y)>5)moved=1;st.scrollLeft=d.l-(e.clientX-d.x);st.scrollTop=d.t-(e.clientY-d.y)};
+ addEventListener('pointerup',()=>d=null);
+ st.addEventListener('wheel',e=>{if(e.ctrlKey){e.preventDefault();mode='zoom';rel=Math.min(6,Math.max(.4,rel*(e.deltaY<0?1.1:.9)));apply()}},{passive:false});
+ activeViewer=v;return v;
+}
+
+function embedUrl(u){const m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);if(m){const s=u.match(/[?&]t=(\d+)/);return`https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0${s?'&start='+s[1]:''}`}
+ const x=u.match(/vimeo\.com\/(\d+)/);return x?`https://player.vimeo.com/video/${x[1]}?autoplay=1`:null}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){io.unobserve(e.target);e.target._f&&e.target._f()}}),{rootMargin:'400px'});
+const canEmbed=u=>EMBED[u]===true&&!NOEMBED.some(h=>u.includes(h));
+const isSite=it=>it.type==='link'&&!embedUrl(it.src);
+function gEmbed(u){let m=u.match(/docs\.google\.com\/presentation\/d\/([\w-]+)/);if(m)return`https://docs.google.com/presentation/d/${m[1]}/embed`;m=u.match(/docs\.google\.com\/(document|spreadsheets)\/d\/([\w-]+)/);if(m)return`https://docs.google.com/${m[1]}/d/${m[2]}/preview`;m=u.match(/drive\.google\.com\/file\/d\/([\w-]+)/);if(m)return`https://drive.google.com/file/d/${m[1]}/preview`;return u}
+const nz=s=>String(s).toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,' ').trim();
+const GROUPS=[
+ {n:'Media Codes',t:[['Acting'],['Camera Techniques','Camera'],['Colour'],['Editing'],['Graphic','Graphics'],['Lighting','Shading in animation'],['Mise En Scene','Hair and make up','Props','Costume','Set design'],['Sound','Sound recording'],['Special Effects'],['Text'],['Typography'],['Visual Composition','Composition']]},
+ {n:'Media Conventions',t:[
+  ['Story Principles','Narrative structure','Cause and effect','Opening, development and resolution','Point of view','Multiple storylines','Establishment and development of characters','Characters','Setting','Structuring of time','Structuring time','The periodic table of storytelling','TV tropes generator','Animation - how Rick and Morty is written'],
+  ['Elements of Page Layout','Editorial design','Elements of great movie posters'],
+  ['Method of Exhibition'],
+  ['Titles & Credits Sequence'],
+  ['Generic Structures','Genre conventions','Generic conventions','Music video','Graphic novels','Social issue advertising','Creative documentaries','Documentary structure','Hybridised media','Mockumentary','Podcast categories','Movie posters','Print advertising','Photographers and styles','Commercial photography','Panography']]},
+ {n:'Media Production Process',t:[
+  ['Development','Filmmaking ideas','Investigating and pitching ideas','Analysing podcasts','Podcast examples','Best podcasts','Animation overview'],
+  ['Pre Production','Pre-production','Preproduction','Storyboards','Animatic','Screenplay','Shot list','Breaking down a script for production','Production templates and forms','Actors and casting','Filming in Melbourne','Fake weapons or scaring the public','Practical advice for writing a short film','StudioBinder - info and tutorials'],
+  ['Production','Production roles','Animation','Photography techniques','Media Production','Smartphone filmmaking','No equipment','Making a podcast','Principles of animation','Zines'],
+  ['Post Production','Post-production','Postproduction'],
+  ['Distribution','Social Media']]},
+ {n:"Creator's Style",flat:1,t:[["Creator's Style",'Creators style','Directors style and creators','Directors style','Directors','Style','Creators']]}];
+const TMAP={},GOF={};
+GROUPS.forEach((g,gi)=>(g.t||[]).forEach(([n,...al])=>{GOF[n]=gi;TMAP[nz(n)]=n;al.forEach(a=>TMAP[nz(a)]=n)}));
+const topicOf=c=>TMAP[nz(c)]||c;
+const ICON={video:'🎬',audio:'🎧',pdf:'📄',file:'📎',link:'▶',image:'🖼️',set:'🖼️'};
+function thumb(it){
+ const d=el('div','th',`<span>${isSite(it)?'🌐':ICON[it.type]||'📎'}</span>`);
+ if(isSite(it))d.append(el('em','',esc(new URL(it.src).hostname.replace(/^www\./,''))));
+ if(it.srcs)d.append(el('b','bd','▦ '+it.srcs.length));
+ return d}
+function media(it,play){
+ let n;
+ if(it.drive&&(it.type==='video'||it.type==='audio'||it.type==='pdf')){n=el('iframe');n.title=it.title;n.allow='autoplay; fullscreen';n.allowFullscreen=true;n.src=it.src}
+ else if(it.type==='video'){n=el('video');n.controls=true;n.playsInline=true;n.autoplay=!!play;n.src=it.src;if(play)Promise.resolve(n.play()).catch(()=>{n.muted=true;n.play().catch(()=>{})})}
+ else if(it.type==='audio'){n=el('div','aud',`<big>🎧</big><strong>${esc(it.title)}</strong>`);const a=el('audio');a.controls=true;a.autoplay=!!play;a.src=it.src;n.append(a)}
+ else if(it.type==='image'){n=el('img');n.alt=it.title;n.src=it.src}
+ else if(it.type==='set')n=viewer(it.srcs.map((s,i)=>({s,l:(it.hot&&it.hot[i])||[]})));
+ else if(it.type==='pdf'){n=el('iframe');n.title=it.title;n.src=it.src}
+ else if(it.type==='link'&&embedUrl(it.src)){n=el('iframe');n.allow='autoplay; fullscreen';n.allowFullscreen=true;n.src=embedUrl(it.src).replace('autoplay=1','autoplay='+(play?1:0))}
+ else if(it.type==='link'&&canEmbed(it.src))n=viewer([],gEmbed(it.src),it.src);
+ else{n=el('div','aud',`<big>${it.type==='link'?'🌐':'📎'}</big><strong>${esc(it.title)}</strong>${it.type==='link'?`<span>${EMBED[it.src]===false||NOEMBED.some(h=>it.src.includes(h))?'This website does not allow embedding, so it opens in a new tab.':'This website opens in a new tab.'}</span>`:''}`);const a=el('a','dl',it.type==='link'?'Open link ↗':'Open / download');a.href=it.src;if(it.type==='link'){a.target='_blank';a.rel='noopener'}else a.download='';n.append(a);if(it.type==='link'&&EMBED[it.src]===undefined&&!NOEMBED.some(h=>it.src.includes(h))){const tb=el('button','tv','Try viewing here');tb.onclick=()=>n.replaceWith(viewer([],gEmbed(it.src),it.src,()=>n.isConnected||0));n.append(tb)}}
+ return n}
+function inspoViewer(forms){
+ const root=el('div','iv'),M=new Map();
+ forms.forEach(f=>(INSPO[f]||[]).forEach(x=>{const k=x.srcs?x.srcs[0]:x.src,m=M.get(k);
+  if(m){m.forms.push(f);x.cats.forEach(c=>{if(!m.cats.some(d=>d[0]===c[0]&&d[1]===c[1]))m.cats.push([...c])})}
+  else M.set(k,{...x,cats:x.cats.map(c=>[...c]),forms:[f]})}));
+ const all=[...M.values()];
+ if(!all.length){root.className='empty';root.innerHTML=`<big>✨</big><strong>${forms.length>1?'Inspiration':PAGES[forms[0]].n+' inspiration'} is on its way</strong><p>Add files to the <code>inspiration/${forms.length>1?'&lt;media form&gt;':forms[0]}/</code> folder in the repo and they will appear here.</p>`;return root}
+ let fsel='all',f={topic:'',cat:'',sub:''},q='',list=[],cur=null,hist=[],deck=[],open=new Set(),initOpen=true;
+ root.innerHTML='<div class="itop"><button class="go">🎲 Inspire me</button><button class="pv">← Previous</button><span class="rc"></span><input class="q" type="search" placeholder="Search" aria-label="Search inspirations"></div><div class="ibody"><nav class="ifilter" aria-label="Filters"></nav><div class="imain"><div class="tags"></div><div class="istage"></div><div class="istrip"></div></div></div>';
+ const $f=$('.ifilter',root),$s=$('.istage',root),$t=$('.istrip',root),$g=$('.tags',root);
+ const DYNG={};all.forEach(x=>x.cats.forEach(c=>{if(c[2]){const tp=topicOf(c[0]);if(!(tp in GOF))DYNG[tp]=c[2]}}));
+ const grpOK=n=>DYNG[n]&&GROUPS.some(g=>nz(g.n)===nz(DYNG[n]));
+ const inForm=x=>fsel==='all'||x.forms.includes(fsel);
+ const pool=()=>all.filter(x=>inForm(x)&&(!q||(x.title+' '+x.cats.map(c=>c.join(' ')).join(' ')).toLowerCase().includes(q))&&(!f.topic||x.cats.some(([c,s])=>topicOf(c)===f.topic&&(!f.cat||c===f.cat)&&(!f.sub||s===f.sub))));
+ const btn=(h,on,fn,cls)=>{const b=el('button',(on?'on ':'')+(cls||''),h);b.onclick=fn;return b};
+ function filters(){
+  $f.replaceChildren();
+  const clr=()=>{f={topic:'',cat:'',sub:''}};
+  if(forms.length>1){const d=el('details','','<summary>Media form</summary><div></div>');d.open=true;const w=$('div',d);
+   [['all','All media forms',all.length],...forms.map(k=>[k,PAGES[k].n,all.filter(x=>x.forms.includes(k)).length])].forEach(([k,n,c])=>{const b=btn(`${n}<i>${c}</i>`,fsel===k,()=>{fsel=k;clr();refresh()});b.disabled=!c;w.append(b)});$f.append(d)}
+  const base=all.filter(inForm),T={};
+  base.forEach(x=>x.cats.forEach(([c,s])=>{const tp=topicOf(c),o=T[tp]=T[tp]||{ids:new Set(),c:{}},k=o.c[c]=o.c[c]||{ids:new Set(),s:{}};o.ids.add(x);k.ids.add(x);if(s)(k.s[s]=k.s[s]||new Set()).add(x)}));
+  $f.append(btn(`All<i>${base.length}</i>`,!f.topic,()=>{clr();refresh()}));
+  const topic=(w,n,flat)=>{
+   if(flat)w.append(btn(`All<i>${T[n].ids.size}</i>`,f.topic===n&&!f.cat&&!f.sub,()=>{f={topic:n,cat:'',sub:''};refresh()}));
+   else w.append(btn(`${esc(n)}<i>${T[n].ids.size}</i>`,f.topic===n&&!f.cat,()=>{f={topic:n,cat:'',sub:''};refresh()}));
+   if(flat||f.topic===n)Object.keys(T[n].c).sort().forEach(c=>{const k=T[n].c[c],own=nz(c)!==nz(n);
+    if(own)w.append(btn(`${esc(c)}<i>${k.ids.size}</i>`,f.cat===c&&!f.sub,()=>{f={topic:n,cat:c,sub:''};refresh()},'s'));
+    Object.keys(k.s).sort().forEach(s=>w.append(btn(`${esc(s)}<i>${k.s[s].size}</i>`,f.cat===c&&f.sub===s,()=>{f={topic:n,cat:c,sub:s};refresh()},own&&!flat?'s2':'s')))})};
+  let first=true;
+  GROUPS.forEach((g,gi)=>{
+   const ts=[...g.t.map(x=>x[0]).filter(n=>T[n]),...Object.keys(T).filter(n=>!(n in GOF)&&DYNG[n]&&nz(DYNG[n])===nz(g.n)).sort((a,b)=>a.localeCompare(b))];
+   if(!ts.length)return;
+   const ids=new Set();ts.forEach(n=>T[n].ids.forEach(i=>ids.add(i)));
+   const d=el('details','',`<summary>${g.n}<i>${ids.size}</i></summary><div></div>`),w=$('div',d);
+   if(initOpen&&first)open.add(gi);first=false;
+   if(f.topic&&ts.includes(f.topic))open.add(gi);
+   d.open=open.has(gi);d.ontoggle=()=>{d.open?open.add(gi):open.delete(gi)};
+   ts.forEach(n=>topic(w,n,g.flat));
+   $f.append(d)});
+  Object.keys(T).filter(n=>!(n in GOF)&&!grpOK(n)).sort((a,b)=>a.localeCompare(b)).forEach(n=>topic($f,n,false));  // a category nobody has sorted yet shows on its own, never as "Other"
+  initOpen=false}
+ function strip(){$t.replaceChildren();list.forEach(it=>{const b=el('button','sc'+(it===cur?' on':''),`<span class="ttl">${esc(it.title)}</span>`);b.prepend(thumb(it));b._it=it;b.onclick=()=>show(it,true);$t.append(b)})}
+ function upd(){$('.pv',root).disabled=hist.length<2;$('.rc',root).textContent=`${list.length} item${list.length===1?'':'s'}`}
+ function show(it,play,back){
+  cur=it;if(it&&!back&&hist[hist.length-1]!==it)hist.push(it);
+  $s.replaceChildren();$g.replaceChildren();
+  if(!it){$s.append(el('div','aud','<big>🔎</big><strong>Nothing matches</strong>'));upd();return}
+  $s.append(media(it,play));
+  $g.append(el('span','tt',esc(it.title)));
+  if(forms.length>1)it.forms.forEach(k=>{const fs=el('span','',PAGES[k].n);fs.style.cssText=`background:${PAGES[k].c};color:#1c2239`;$g.append(fs)});
+  it.cats.forEach(c=>$g.append(el('span','',esc(c.slice(0,2).filter(Boolean).join(' / ')))));
+  $t.querySelectorAll('.sc').forEach(b=>{const on=b._it===it;b.classList.toggle('on',on);if(on)b.scrollIntoView({block:'nearest',inline:'center'})});
+  upd()}
+ function refresh(play=true){list=pool();deck=[];filters();cur=list.includes(cur)?cur:null;strip();if(!cur){const P=pickable();show(P.length?P[Math.random()*P.length|0]:null,play)}else upd()}
+ const pickable=()=>{const L=list.filter(x=>!isSite(x));return L.length?L:list};
+ function rand(){if(!list.length)return;if(!deck.length){deck=[...pickable()];for(let i=deck.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[deck[i],deck[j]]=[deck[j],deck[i]]}}
+  let it=deck.pop();if(it===cur&&deck.length)it=deck.pop();show(it,true)}
+ $('.go',root).onclick=rand;
+ $('.pv',root).onclick=()=>{if(hist.length>1){hist.pop();show(hist[hist.length-1],true,true)}};
+ $('.q',root).oninput=e=>{q=e.target.value.trim().toLowerCase();refresh(false)};
+ list=pool();filters();strip();{const P=pickable();show(P[Math.random()*P.length|0],true)}
+ return root}
+
+function home(app){
+ document.body.classList.add('home');
+ const R={sat:[5.2,9.3,29.2,31.7],video:[34.6,8.6,27.2,27.7],animation:[63.1,4,27.9,29.3],print:[9.8,65,26.4,27],audio:[36.8,62,26.7,28.6],photography:[64,58.9,29.5,29.8]};
+ const links=Object.entries(R).map(([k,r])=>`<a class="panel" href="#${k}" style="left:${r[0]}%;top:${r[1]}%;width:${r[2]}%;height:${r[3]}%;--ac:${PAGES[k].c}" aria-label="${PAGES[k].n}"><span class="pill">${PAGES[k].n}</span></a>`).join('');
+ app.innerHTML=`<div class="homewrap"><div class="logo"><img alt="Media: clapper board, video camera, animation, print, microphone and camera" src="${LOGO}">${links}</div></div>`;
+}
+
+function sub(app,p,t){
+ const P=PAGES[p],tab=P.tabs.find(x=>x.k===t)||P.tabs[0];
+ document.documentElement.style.setProperty('--ac',P.c);
+ const side=P.tabs.map(x=>`<a href="#${p}-${x.k}" class="${x.sm?'sm ':''}${x===tab?'on':''}"><b>${x.t}</b><span>${x.s}</span></a>`).join('');
+ app.innerHTML=`<div class="sub"><aside><h1>${P.n}</h1>${side}</aside><section class="pane"><h2>${tab.t}<small>${tab.s}</small></h2></section></div>`;
+ const pane=$('.pane',app);if(tab.inspo)pane.classList.add('nohead');
+ if(tab.web)pane.append(viewer([],tab.web));
+ else if(tab.pages&&tab.pages.length)pane.append(viewer(tab.pages));
+ else if(tab.inspo)pane.append(inspoViewer(p==='sat'?Object.keys(PAGES).filter(k=>k!=='sat'):[p]));
+ else pane.append(el('div','empty',tab.pages?`<big>📄</big><strong>${P.n}: ${tab.t}</strong><p>Upload this PDF and it will appear here with left and right page arrows, zoom and fit controls.</p>`:`<big>✨</big><strong>${P.n} inspiration is on its way</strong><p>Videos play here when you click them, and images open in the gallery.</p>`));
+}
+
+function route(){
+ const [p,t]=(location.hash.slice(1)||'home').split('-');activeViewer=null;
+ const app=$('#app');document.body.classList.remove('home');
+ document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.p===p));
+ PAGES[p]?sub(app,p,t):home(app);
+}
+addEventListener('hashchange',route);route();
+</script></body></html>

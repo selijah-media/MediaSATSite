@@ -1,0 +1,3 @@
+# Optional rules for the small link files kept in this folder (Drive items use folder names and shortcuts instead).
+#   <folder or file under inspiration/>  >  <media forms, comma separated>
+#   <folder or file under inspiration/>  =>  <Category> / <Sub>
