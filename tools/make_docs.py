@@ -17,7 +17,17 @@ Drive layout it understands
 import json, os, re, shutil, subprocess, sys, tempfile, time, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import drive_scan as ds
+
+def _run(cmd):
+    try: subprocess.run(cmd, check=True, timeout=900, capture_output=True)
+    except Exception as ex: print('  (setup step failed: %s)' % ' '.join(cmd[:4]))
+try: import pypdf
+except ImportError:
+    _run([sys.executable, '-m', 'pip', 'install', '-q', '--break-system-packages', 'pypdf'])
+    import pypdf
 from pypdf import PdfReader
+if not shutil.which('pdftoppm'): _run(['sudo', 'apt-get', 'install', '-y', '-qq', 'poppler-utils'])
+ORDER = []
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(ROOT, 'assets', 'dd')
@@ -86,7 +96,13 @@ def dest_page(r, d):
 class Ctx:
     def __init__(self, drive, fetch=fetch_default, tmp=None):
         self.drive, self.fetch, self.tmp = drive, fetch, tmp or tempfile.mkdtemp()
-        self.soffice = shutil.which('soffice') or shutil.which('libreoffice')
+        self.soffice = shutil.which('soffice') or shutil.which('libreoffice'); self.tried = False
+    def office(self):
+        if not self.soffice and not self.tried:
+            self.tried = True
+            _run(['sudo', 'apt-get', 'update', '-qq']); _run(['sudo', 'apt-get', 'install', '-y', '-qq', 'libreoffice-writer', 'libreoffice-impress', 'libreoffice-calc', 'fonts-liberation'])
+            self.soffice = shutil.which('soffice') or shutil.which('libreoffice')
+        return self.soffice
 
 def item0(ctx, f):
     """Returns dict(t, p, th, dl) for one Drive file, or None."""
@@ -103,7 +119,7 @@ def item0(ctx, f):
             except Exception as ex: log.append('  could not render %s: %s' % (n, ex))
         log.append('  %s could not be downloaded, showing Google\'s own viewer instead' % n)
         return dict(t=t, p=[{'s': ds.prev(fid), 'l': []}], th=ds.thumb(fid).replace('w2000', 'w400'), dl=dl)
-    if e in OFFICE and ctx.soffice:
+    if e in OFFICE and ctx.office():
         src = os.path.join(ctx.tmp, fid + e)
         if ctx.fetch(fid, src, b'PK' if e[-1] == 'x' else b''):
             try:
@@ -133,13 +149,15 @@ def file_docs(ctx, files):
     """One tile per file. A PDF and a PowerPoint/Word/Excel file with the same name become ONE tile:
     students read the PDF, and the download button gives them the editable PowerPoint/Word/Excel file."""
     docs, groups = [], {}
-    for f in files: groups.setdefault(os.path.splitext(f['name'].lower())[0].strip(), []).append(f)
+    p1 = [f for f in files if ext(f['name']) == '.pdf']; o1 = [f for f in files if ext(f['name']) in OFFICE + ('.xlsx', '.xls')]
+    one_pair = len(files) == 2 and len(p1) == 1 and len(o1) == 1     # different names but the only two files: still a pair
+    for f in files: groups.setdefault('*' if one_pair else os.path.splitext(f['name'].lower())[0].strip(), []).append(f)
     for stem, fs in groups.items():
         pdfs = [f for f in fs if ext(f['name']) == '.pdf']; offs = [f for f in fs if ext(f['name']) in OFFICE + ('.xlsx', '.xls')]
         if pdfs and offs:
             d = item(ctx, pdfs[0])
             if d:
-                d['dl'] = dl_url(offs[0]['id']); d['dlt'] = DLT.get(ext(offs[0]['name']), '⬇ Download'); docs.append(d)
+                d['dl'] = dl_url(offs[0]['id']); d['dlt'] = DLT.get(ext(offs[0]['name']), '⬇ Download'); d['paired'] = 1; docs.append(d)
                 for f in fs:
                     if f not in (pdfs[0], offs[0]):
                         x = item(ctx, f)
@@ -221,6 +239,14 @@ def one_pack(ctx, pid, n, res):
                 fs = form_split(ctx, c['id'])
                 if fs: res['x'].setdefault(n, []).append({'n': c['name'], 'f': fs})
             else: loose.append(c)
+        if n in res['x']:
+            def rank(e):
+                nn = ds.nz(e['n'])
+                for i, frag in enumerate(ORDER):
+                    if frag in nn: return (i, nn)
+                return (len(ORDER), nn)
+            res['x'][n].sort(key=rank)
+            log.append('  SAT PACK %s menu items: %s' % (n, ', '.join(e['n'] for e in res['x'][n])))
         for d in file_docs(ctx, loose):
             res['c' if 'criteria' in ds.nz(d['t']) else 'pk'].setdefault(n, []).append(d)
         for key in ('c', 'pk'):
@@ -228,6 +254,7 @@ def one_pack(ctx, pid, n, res):
 
 def build(drive, folders, root_id, fetch=fetch_default):
     ctx = Ctx(drive, fetch)
+    del log[:]
     res = dict(status='ok', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={})
     shutil.rmtree(OUT_DIR, ignore_errors=True)
     def pick(key, names):
@@ -262,11 +289,13 @@ def main():
     for k, v in folders.items():
         m = re.search(r'folders/([\w-]+)', v)
         if m: folders[k] = m.group(1)
+    ORDER[:] = [x.lower() for x in cfg.get('menu_order', [])]
     key = os.environ.get('DRIVE_API_KEY')
     drive = ds.Drive(key) if key else ds.PublicDrive()
     try: res = build(drive, folders, os.environ.get('DRIVE_ROOT_FOLDER_ID'))
     except Exception as ex:
         res = dict(status='error', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
+    res['log'] = log[:60]
     open(os.path.join(ROOT, 'assets', 'drivedocs.js'), 'w').write('const DRIVEDOCS=' + json.dumps(res, ensure_ascii=False) + ';')
     print('### Documents from Google Drive (Top Design, Copyright, SAT Packs)')
     for l in log: print(l)

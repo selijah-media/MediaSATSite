@@ -178,17 +178,18 @@ const packs=f=>{
  return [
  {k:'in',t:'Inspiration',s:'Videos and images',inspo:[]},
  {k:'p1',t:'SAT Pack 1',s:'U3 AOS 2 Research, Development and Experimentation',...(ddl((DD.pk||{})[1])||(P.p1?g('p1'):{pages:DOCS.p1}))},
+ ...xtabs(1,f),
  {k:'c1',t:'SAT 1 Criteria',s:'Unit 3 Outcome 2',sm:1,...(ddl((DD.c||{})[1])||{pages:DOCS.c1})},
  {k:'s1',t:'Student Samples',s:'For Pack 1',sm:1,...(ddl(((DD.s||{})[1]||{})[f])||(!(P.s1&&P.s1.length)&&DOCS.s1&&DOCS.s1[f]?{docs:DOCS.s1[f]}:g('s1')))},
- ...xtabs(1,f),
  {k:'p2',t:'SAT Pack 2',s:'U3 AOS 3 Pre-production Planning',...(ddl((DD.pk||{})[2])||g('p2'))},
+ ...xtabs(2,f),
  {k:'c2',t:'SAT 2 Criteria',s:'Unit 3 Outcome 3',sm:1,...(ddl((DD.c||{})[2])||{pages:DOCS.c2})},
  {k:'s2',t:'Student Samples',s:'For Pack 2',sm:1,...(ddl(((DD.s||{})[2]||{})[f])||g('s2'))},
- ...xtabs(2,f),appx(f),
+ appx(f),
  {k:'p3',t:'SAT Pack 3',s:'U4 AOS 1 Media Production',...(ddl((DD.pk||{})[3])||g('p3'))},
+ ...xtabs(3,f),
  {k:'c3',t:'SAT 3 Criteria',s:'Unit 4 Outcome 1',sm:1,...(ddl((DD.c||{})[3])||{pages:DOCS.c3})},
- {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,...(ddl(((DD.s||{})[3]||{})[f])||g('s3'))},
- ...xtabs(3,f)]};
+ {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,...(ddl(((DD.s||{})[3]||{})[f])||g('s3'))}]};
 /* To add content later: put image/page sources in `pages` (PDF pages as images) or items in `inspo`,
    e.g. {type:'video',src:'https://youtu.be/…',title:'…'} or {type:'image',src:'…',title:'…'} */
 const PAGES={
@@ -412,15 +413,17 @@ function docsPane(tab){
 function sub(app,p,t){
  const P=PAGES[p],tab=P.tabs.find(x=>x.k===t)||P.tabs[0];
  document.documentElement.style.setProperty('--ac',P.c);
- const COL=(()=>{try{return JSON.parse(localStorage.getItem('sidecol')||'{}')}catch(e){return{}}})();
+ const COL=(()=>{try{return JSON.parse(localStorage.getItem('sidecol2')||'{}')}catch(e){return{}}})();
  const lnk=x=>`<a href="#${p}-${x.k}" class="${x.sm?'sm ':''}${x===tab?'on':''}"><b>${x.t}</b><span>${x.s}</span></a>`;
  const grps=[];P.tabs.forEach(x=>{if(x.hdr||!x.sm||!grps.length)grps.push({h:x,kids:[]});else grps[grps.length-1].kids.push(x)});
- const side=grps.map(g=>{const id=p+':'+(g.h.hdr||g.h.k),has=g.kids.length>0,open=!COL[id]||g.kids.includes(tab)||g.h===tab;
+ const side=grps.map(g=>{const id=p+':'+(g.h.hdr||g.h.k),has=g.kids.length>0,open=COL[id]===1||g.kids.includes(tab)||g.h===tab;
   const row=g.h.hdr?`<h4 class="hdr">${g.h.hdr}</h4>`:lnk(g.h);
   return `<div class="grp${has&&!open?' col':''}" data-id="${id}"><div class="prow">${row}${has?`<button class="tg" aria-label="Collapse or expand" aria-expanded="${open}">▾</button>`:''}</div>${has?`<div class="kids">${g.kids.map(lnk).join('')}</div>`:''}</div>`}).join('');
  app.innerHTML=`<div class="sub"><aside><h1>${P.n}</h1>${side}</aside><section class="pane"><h2>${tab.t}<small>${tab.s}</small></h2></section></div>`;
- app.querySelectorAll('.tg').forEach(b=>b.onclick=()=>{const g=b.closest('.grp'),c=g.classList.toggle('col');b.setAttribute('aria-expanded',!c);COL[g.dataset.id]=c?1:0;try{localStorage.setItem('sidecol',JSON.stringify(COL))}catch(e){}});
+ app.querySelectorAll('.tg').forEach(b=>b.onclick=()=>{const g=b.closest('.grp'),c=g.classList.toggle('col');b.setAttribute('aria-expanded',!c);COL[g.dataset.id]=c?0:1;try{localStorage.setItem('sidecol2',JSON.stringify(COL))}catch(e){}});
  const pane=$('.pane',app);if(tab.inspo)pane.classList.add('nohead');
+ {const bad=(DD.log||[]).filter(x=>/not found|ERROR|: 0 document/.test(x));
+  if((DD.status!=='ok'||bad.length)&&!tab.inspo&&(tab.docs||/^[pcs]\d$|^ap$|^td/.test(tab.k)))$('h2',pane).after(el('div','dnote','<b>Documents from Google Drive are not fully loaded.</b> '+(DD.status==='ok'?'':'The nightly update has not read the Drive document folders yet. ')+bad.map(esc).join(' · ')+' <i>(Teacher: open Actions on GitHub, click the latest run and read the summary.)</i>'))}
  if(tab.web)pane.append(viewer([],gEmbed(tab.web),/google\.com/.test(tab.web)?tab.web:undefined));
  else if(tab.docs)pane.append(docsPane(tab));
  else if(tab.pages&&tab.pages.length)pane.append(viewer(tab.pages));

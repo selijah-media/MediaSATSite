@@ -209,3 +209,11 @@ with open(os.path.join(root, 'assets', 'inspiration.js'), 'w', encoding='utf-8')
     fh.write('const INSPO=' + json.dumps(out, ensure_ascii=False) + ';\nconst EMBED=' + json.dumps(EMBED) + ';\nconst DRIVE_STATUS=' + json.dumps(DRIVE_STATUS) + ';')
 open(os.path.join(root, 'assets', 'link-report.txt'), 'w').write('\n'.join(report) + '\n')
 print({k: len(v) for k, v in out.items()}); print('\n'.join(report))
+
+# Also build the Top Design / Copyright / SAT Pack documents from Google Drive (needs no separate workflow step)
+if not os.environ.get('NO_DOCS'):
+    try:
+        import subprocess, sys
+        if False and "x" in open(os.path.join(root, 'assets', 'drivedocs.js')).read():
+            subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'make_docs.py')], check=False)
+    except Exception as ex: print('Documents step skipped: %s' % ex)
