@@ -242,10 +242,15 @@ def one_pack(ctx, pid, n, res):
         if n in res['x']:
             def rank(e):
                 nn = ds.nz(e['n'])
+                m = re.match(r'\s*(\d+)\s*[.\-)]', e['n'])     # folders numbered "1. ...", "2. ..." keep that order
+                if m: return (0, int(m.group(1)), nn)
                 for i, frag in enumerate(ORDER):
-                    if frag in nn: return (i, nn)
-                return (len(ORDER), nn)
+                    if frag in nn: return (1, i, nn)
+                return (2, 0, nn)
             res['x'][n].sort(key=rank)
+            for i, e in enumerate(res['x'][n]):
+                e['first'] = 1 if i == 0 and re.match(r'\s*1\s*[.\-)]', e['n']) else 0
+                e['n'] = re.sub(r'^\s*\d+\s*[.\-)]\s*', '', e['n']).strip() or e['n']
             log.append('  SAT PACK %s menu items: %s' % (n, ', '.join(e['n'] for e in res['x'][n])))
         for d in file_docs(ctx, loose):
             res['c' if 'criteria' in ds.nz(d['t']) else 'pk'].setdefault(n, []).append(d)
@@ -301,6 +306,12 @@ def main():
     except Exception as ex:
         res = dict(status='error', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
     res['log'] = log[:60]
+    try:   # stamp the page so browsers always fetch the newest data
+        ip = os.path.join(ROOT, 'index.html'); h = open(ip, encoding='utf-8').read()
+        stamp = str(int(time.time()))
+        h2 = re.sub(r'assets/(drivedocs|inspiration)\.js(\?v=\d+)?"', lambda m: 'assets/%s.js?v=%s"' % (m.group(1), stamp), h)
+        if h2 != h: open(ip, 'w', encoding='utf-8').write(h2)
+    except Exception: pass
     open(os.path.join(ROOT, 'assets', 'drivedocs.js'), 'w').write('const DRIVEDOCS=' + json.dumps(res, ensure_ascii=False) + ';')
     print('### Documents from Google Drive (Top Design, Copyright, SAT Packs)')
     for l in log: print(l)

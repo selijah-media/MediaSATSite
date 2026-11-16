@@ -170,23 +170,24 @@ const ddl=(a)=>Array.isArray(a)&&a.length?{docs:a}:null;
 const APPX_LINKS={audio:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}],
  video:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}],
  animation:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}]};
-const xtabs=(n,f)=>((DD.x||{})[n]||[]).map((e,i)=>{const l=[...(e.f['*']||[]),...(e.f[f]||[])];return l.length?{k:'x'+n+'_'+i,t:e.n,s:'Pack '+n+' resources',sm:1,docs:l}:null}).filter(Boolean);
+const parx=(n,f)=>{const e=((DD.x||{})[n]||[])[0];return e&&e.first&&!((DD.pk||{})[n]||[]).length?{docs:[...(e.f['*']||[]),...(e.f[f]||[])]}:null};
+const xtabs=(n,f)=>((DD.x||{})[n]||[]).map((e,i)=>{const l=[...(e.f['*']||[]),...(e.f[f]||[])];return l.length?{k:'x'+n+'_'+i,t:e.n,s:'Pack '+n+' resources',sm:1,docs:l}:null}).filter(Boolean).filter((x,i,a)=>!(parx(n,f)&&x.k==='x'+n+'_0'));
 const appx=f=>({k:'ap',t:'Media Form - Appendix',s:'Documents to download',sm:1,docs:[...(APPX_LINKS[f]||[]),...((DD.ap||{})['*']||[]),...((DD.ap||{})[f]||[])]});
 const packs=f=>{
  const P=(typeof PACKS!=='undefined'&&PACKS[f])||{};
  const g=k=>{const v=P[k];return typeof v==='string'&&v?{web:v}:Array.isArray(v)&&v.length?{docs:v.map(x=>({t:x[0],u:x[1]}))}:{pages:[]}};
  return [
  {k:'in',t:'Inspiration',s:'Videos and images',inspo:[]},
- {k:'p1',t:'SAT Pack 1',s:'U3 AOS 2 Research, Development and Experimentation',...(ddl((DD.pk||{})[1])||(P.p1?g('p1'):{pages:DOCS.p1}))},
+ {k:'p1',t:'SAT Pack 1',s:'U3 AOS 2 Research, Development and Experimentation',...(ddl((DD.pk||{})[1])||parx(1,f)||(P.p1?g('p1'):{pages:DOCS.p1}))},
  ...xtabs(1,f),
  {k:'c1',t:'SAT 1 Criteria',s:'Unit 3 Outcome 2',sm:1,...(ddl((DD.c||{})[1])||{pages:DOCS.c1})},
  {k:'s1',t:'Student Samples',s:'For Pack 1',sm:1,...(ddl(((DD.s||{})[1]||{})[f])||(!(P.s1&&P.s1.length)&&DOCS.s1&&DOCS.s1[f]?{docs:DOCS.s1[f]}:g('s1')))},
- {k:'p2',t:'SAT Pack 2',s:'U3 AOS 3 Pre-production Planning',...(ddl((DD.pk||{})[2])||g('p2'))},
+ {k:'p2',t:'SAT Pack 2',s:'U3 AOS 3 Pre-production Planning',...(ddl((DD.pk||{})[2])||parx(2,f)||g('p2'))},
  ...xtabs(2,f),
  {k:'c2',t:'SAT 2 Criteria',s:'Unit 3 Outcome 3',sm:1,...(ddl((DD.c||{})[2])||{pages:DOCS.c2})},
  {k:'s2',t:'Student Samples',s:'For Pack 2',sm:1,...(ddl(((DD.s||{})[2]||{})[f])||g('s2'))},
  appx(f),
- {k:'p3',t:'SAT Pack 3',s:'U4 AOS 1 Media Production',...(ddl((DD.pk||{})[3])||g('p3'))},
+ {k:'p3',t:'SAT Pack 3',s:'U4 AOS 1 Media Production',...(ddl((DD.pk||{})[3])||parx(3,f)||g('p3'))},
  ...xtabs(3,f),
  {k:'c3',t:'SAT 3 Criteria',s:'Unit 4 Outcome 1',sm:1,...(ddl((DD.c||{})[3])||{pages:DOCS.c3})},
  {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,...(ddl(((DD.s||{})[3]||{})[f])||g('s3'))}]};
