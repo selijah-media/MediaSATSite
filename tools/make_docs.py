@@ -284,6 +284,11 @@ def build(drive, folders, root_id, fetch=fetch_default):
     return res
 
 def main():
+    try:
+        cur = open(os.path.join(ROOT, 'assets', 'drivedocs.js')).read()
+        if cur.startswith('const DRIVEDOCS=') and not cur.startswith('const DRIVEDOCS={"status":"off"'):
+            print('Documents were already built in this run, skipping.'); return
+    except Exception: pass
     cfg = json.load(open(os.path.join(ROOT, 'tools', 'drive_folders.json')))
     folders = {k: v.strip() for k, v in cfg.items() if not k.startswith('_') and isinstance(v, str)}
     for k, v in folders.items():

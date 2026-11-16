@@ -214,6 +214,6 @@ print({k: len(v) for k, v in out.items()}); print('\n'.join(report))
 if not os.environ.get('NO_DOCS'):
     try:
         import subprocess, sys
-        if False and "x" in open(os.path.join(root, 'assets', 'drivedocs.js')).read():
+        if 'DRIVEDOCS={"status":"off"' in open(os.path.join(root, 'assets', 'drivedocs.js')).read():
             subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'make_docs.py')], check=False)
     except Exception as ex: print('Documents step skipped: %s' % ex)
