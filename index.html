@@ -42,6 +42,7 @@ aside a b{display:block;font-size:15px}aside a span{display:block;font-size:12.5
 aside a:hover{background:var(--paper)}
 aside a.on{background:var(--ac);color:#1c2239}aside a.on span{color:#1c2239;opacity:.85}
 aside a.sm{margin-left:16px;padding:6px 12px}
+.prow{display:flex;align-items:flex-start;gap:4px}.prow a,.prow .hdr{flex:1;min-width:0}.tg{flex:none;margin-top:6px;width:30px;height:30px;border:0;border-radius:8px;background:var(--paper);color:var(--navy);cursor:pointer;font-size:14px;transition:transform .15s}.tg:hover{background:var(--line)}.grp.col .tg{transform:rotate(-90deg)}.grp.col .kids{display:none}.prow .hdr{margin-top:16px}
 .pane{display:flex;flex-direction:column;min-width:0;min-height:0;padding:14px 18px 16px}
 .pane h2{margin:0 0 10px;font-size:22px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
 .pane h2 small{font:400 14px 'DM Sans',sans-serif;color:var(--mute)}
@@ -166,6 +167,11 @@ const LOGO="assets/logo.jpg";
 const NOEMBED=["studiobinder.com","metrotrains.com.au","youtube.com","starnow.com"];
 const DD=(typeof DRIVEDOCS!=='undefined'&&DRIVEDOCS)||{};
 const ddl=(a)=>Array.isArray(a)&&a.length?{docs:a}:null;
+const APPX_LINKS={audio:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}],
+ video:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}],
+ animation:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}]};
+const xtabs=(n,f)=>((DD.x||{})[n]||[]).map((e,i)=>{const l=[...(e.f['*']||[]),...(e.f[f]||[])];return l.length?{k:'x'+n+'_'+i,t:e.n,s:'Pack '+n+' resources',sm:1,docs:l}:null}).filter(Boolean);
+const appx=f=>({k:'ap',t:'Media Form - Appendix',s:'Documents to download',sm:1,docs:[...(APPX_LINKS[f]||[]),...((DD.ap||{})['*']||[]),...((DD.ap||{})[f]||[])]});
 const packs=f=>{
  const P=(typeof PACKS!=='undefined'&&PACKS[f])||{};
  const g=k=>{const v=P[k];return typeof v==='string'&&v?{web:v}:Array.isArray(v)&&v.length?{docs:v.map(x=>({t:x[0],u:x[1]}))}:{pages:[]}};
@@ -174,12 +180,15 @@ const packs=f=>{
  {k:'p1',t:'SAT Pack 1',s:'U3 AOS 2 Research, Development and Experimentation',...(ddl((DD.pk||{})[1])||(P.p1?g('p1'):{pages:DOCS.p1}))},
  {k:'c1',t:'SAT 1 Criteria',s:'Unit 3 Outcome 2',sm:1,...(ddl((DD.c||{})[1])||{pages:DOCS.c1})},
  {k:'s1',t:'Student Samples',s:'For Pack 1',sm:1,...(ddl(((DD.s||{})[1]||{})[f])||(!(P.s1&&P.s1.length)&&DOCS.s1&&DOCS.s1[f]?{docs:DOCS.s1[f]}:g('s1')))},
+ ...xtabs(1,f),
  {k:'p2',t:'SAT Pack 2',s:'U3 AOS 3 Pre-production Planning',...(ddl((DD.pk||{})[2])||g('p2'))},
  {k:'c2',t:'SAT 2 Criteria',s:'Unit 3 Outcome 3',sm:1,...(ddl((DD.c||{})[2])||{pages:DOCS.c2})},
  {k:'s2',t:'Student Samples',s:'For Pack 2',sm:1,...(ddl(((DD.s||{})[2]||{})[f])||g('s2'))},
+ ...xtabs(2,f),appx(f),
  {k:'p3',t:'SAT Pack 3',s:'U4 AOS 1 Media Production',...(ddl((DD.pk||{})[3])||g('p3'))},
  {k:'c3',t:'SAT 3 Criteria',s:'Unit 4 Outcome 1',sm:1,...(ddl((DD.c||{})[3])||{pages:DOCS.c3})},
- {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,...(ddl(((DD.s||{})[3]||{})[f])||g('s3'))}]};
+ {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,...(ddl(((DD.s||{})[3]||{})[f])||g('s3'))},
+ ...xtabs(3,f)]};
 /* To add content later: put image/page sources in `pages` (PDF pages as images) or items in `inspo`,
    e.g. {type:'video',src:'https://youtu.be/…',title:'…'} or {type:'image',src:'…',title:'…'} */
 const PAGES={
@@ -203,11 +212,24 @@ $('#nav').innerHTML=Object.entries(PAGES).map(([k,p])=>`<a href="#${k}" data-p="
 let activeViewer=null;
 document.addEventListener('keydown',e=>{if(!activeViewer)return;if(e.key==='ArrowRight')activeViewer.go(1);if(e.key==='ArrowLeft')activeViewer.go(-1)});
 
-function viewer(pages,web,openUrl,onBack,dl,startW){
+function viewer(pages,web,openUrl,onBack,dl,startW,dname,dlt){
  pages=pages.map(p=>typeof p==='string'?{s:p,l:[]}:p);
  let i=0,mode=startW?'width':'page',rel=1,w=web||null,wz=1,moved=0,ou=openUrl;
  const v=el('div','viewer',`<div class="bar"><button class="w bk" data-a="back">← Back to document</button><button class="d" data-a="prev" aria-label="Previous page">‹</button><span class="ct d"></span><button class="d" data-a="next" aria-label="Next page">›</button><i></i><a class="dlv d" hidden></a><i></i><button data-a="out" aria-label="Zoom out">−</button><span class="zl"></span><button data-a="in" aria-label="Zoom in">+</button><button data-a="page">Fit page</button><button class="d" data-a="width">Fit width</button><a class="nt w" target="_blank" rel="noopener">Open in new tab ↗</a></div><div class="wrap"><div class="stage d"><div class="pg"><img alt="Page"></div></div><div class="wb w"></div><button class="side l d" data-a="prev" aria-label="Previous page">‹</button><button class="side r d" data-a="next" aria-label="Next page">›</button></div>`);
- const dla=$('.dlv',v);if(dl){dla.hidden=false;dla.href=dl;dla.setAttribute('download','');dla.textContent=/\.docx?$/i.test(dl)?'⬇ Download template (.docx)':'⬇ Download'}
+ const dla=$('.dlv',v);
+ const imgOnly=()=>pages.filter(pg=>!/drive\.google\.com\/file\/d\/|docs\.google\.com\/|\.(mp4|mov|webm|m4v)(\?|$)/i.test(pg.s));
+ async function makePdf(){const old=dla.textContent;dla.textContent='Preparing PDF…';
+  try{if(!window.jspdf)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=ok;s.onerror=no;document.head.append(s)});
+   const{jsPDF}=window.jspdf;let doc=null;const L=imgOnly();
+   for(const pg of L){const im=await new Promise((ok,no)=>{const x=new Image();x.onload=()=>ok(x);x.onerror=no;x.src=pg.s});
+    let data;try{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);data=c.toDataURL('image/jpeg',.9)}catch(e){continue}
+    const pw=im.naturalWidth*.75,ph=im.naturalHeight*.75,o=pw>ph?'l':'p';if(!doc)doc=new jsPDF({unit:'pt',format:[pw,ph],orientation:o});else doc.addPage([pw,ph],o);
+    doc.addImage(data,'JPEG',0,0,pw,ph);(pg.l||[]).forEach(([x,y,w2,h2,t])=>{const a=[x/100*pw,y/100*ph,w2/100*pw,h2/100*ph];if(typeof t==='string')doc.link(a[0],a[1],a[2],a[3],{url:t});else doc.link(a[0],a[1],a[2],a[3],{pageNumber:t+1})})}
+   if(doc)doc.save(((dname||(document.querySelector('.pane h2')||{}).firstChild?.textContent||'document')+'').replace(/[^\w\- ]+/g,'').trim()+'.pdf');
+  }catch(e){alert('Sorry, the PDF could not be made. Try again, or use the Open link.')}
+  dla.textContent=old}
+ if(dl){dla.hidden=false;dla.href=dl;dla.setAttribute('download','');dla.textContent=dlt||(/\.docx?$/i.test(dl)?'⬇ Download template (.docx)':'⬇ Download')}
+ else if(imgOnly().length){dla.hidden=false;dla.href='#';dla.textContent='⬇ Download PDF';dla.onclick=e=>{e.preventDefault();makePdf()}}
  const img=$('img',v),st=$('.stage',v),pg=$('.pg',v),fr=el('iframe'),vid=el('video');vid.controls=true;vid.playsInline=true;vid.hidden=true;pg.append(vid);const isVid=s=>/\.(mp4|mov|webm|m4v)$/i.test(s.split('?')[0]);const dfr=el('iframe');dfr.hidden=true;dfr.allow='autoplay; fullscreen';dfr.allowFullscreen=true;dfr.title='Video';pg.append(dfr);const isFrame=s=>/drive\.google\.com\/file\/d\/[^/]+\/preview|docs\.google\.com\/(document|presentation|spreadsheets)\/d\/[^/]+\/(preview|embed)/.test(s);fr.title='Embedded website';fr.allow='fullscreen';$('.wb',v).append(fr);
  function draw(){if(!pages.length)return;vid.pause();const pf=isFrame(pages[i].s),pv=!pf&&isVid(pages[i].s);img.hidden=pf||pv;vid.hidden=!pv;dfr.hidden=!pf;if(pf)dfr.src=pages[i].s;else{dfr.removeAttribute('src');if(pv)vid.src=pages[i].s;else img.src=pages[i].s}if(pf)apply();pg.querySelectorAll('.hl').forEach(x=>x.remove());
   (pages[i].l||[]).forEach(([x,y,ww,h,t])=>{const a=el('a','hl');a.style.cssText=`left:${x}%;top:${y}%;width:${ww}%;height:${h}%`;a.dataset.t=t;a.href=typeof t==='string'?t:'#';a.title=typeof t==='string'?t:'Go to page '+(t+1);pg.append(a)})}
@@ -262,6 +284,7 @@ const GROUPS=[
  {n:'Media Production Process',t:[
   ['Development','Filmmaking ideas','Investigating and pitching ideas','Analysing podcasts','Podcast examples','Best podcasts','Animation overview'],
   ['Pre Production','Pre-production','Preproduction','Storyboards','Animatic','Screenplay','Shot list','Breaking down a script for production','Production templates and forms','Actors and casting','Filming in Melbourne','Fake weapons or scaring the public','Practical advice for writing a short film','StudioBinder - info and tutorials'],
+  ['Exposure'],
   ['Production','Production roles','Animation','Photography techniques','Media Production','Smartphone filmmaking','No equipment','Making a podcast','Principles of animation','Zines'],
   ['Post Production','Post-production','Postproduction'],
   ['Distribution','Social Media']]},
@@ -374,7 +397,7 @@ function docsPane(tab){
   const hd=el('div','dhead',tab.docs.length>1?'<button class="dback">← All documents</button>':'');hd.append(el('b','',esc(d.t)));
   if(tab.docs.length>1)$('.dback',hd).onclick=()=>{view.hidden=true;grid.hidden=false;activeViewer=null};
   const st=el('div','istage');
-  if(d.p)st.append(viewer(d.p,undefined,undefined,undefined,d.dl,d.w||(d.p.length===1&&!/\.(mp4|mov|webm|m4v)$/i.test(d.p[0].s||''))));
+  if(d.p)st.append(viewer(d.p,undefined,undefined,undefined,d.dl,d.w||(d.p.length===1&&!/\.(mp4|mov|webm|m4v)$/i.test(d.p[0].s||'')),d.t,d.dlt));
   else if(canEmbed(d.u))st.append(viewer([],gEmbed(d.u),d.u));
   else st.append(media({type:'link',src:d.u,title:d.t}));
   view.append(hd,st)};
@@ -384,12 +407,19 @@ function docsPane(tab){
   if(d.p)th.append(el('b','bd',/\.(mp4|mov|webm|m4v)$/i.test(d.p[0].s||'')?'Video':d.p.length+(d.p.length===1?' page':' pages')));
   c.append(th,el('span','ttl',esc(d.t)));c.onclick=()=>open(i);grid.append(c)});
  if(tab.docs.length===1)open(0);
+ if(!tab.docs.length)grid.append(el('div','empty','<big>📂</big><strong>Nothing here yet</strong><p>Documents added to the Google Drive folder appear here after the next nightly update.</p>'));
  return root}
 function sub(app,p,t){
  const P=PAGES[p],tab=P.tabs.find(x=>x.k===t)||P.tabs[0];
  document.documentElement.style.setProperty('--ac',P.c);
- const side=P.tabs.map(x=>x.hdr?`<h4 class="hdr">${x.hdr}</h4>`:`<a href="#${p}-${x.k}" class="${x.sm?'sm ':''}${x===tab?'on':''}"><b>${x.t}</b><span>${x.s}</span></a>`).join('');
+ const COL=(()=>{try{return JSON.parse(localStorage.getItem('sidecol')||'{}')}catch(e){return{}}})();
+ const lnk=x=>`<a href="#${p}-${x.k}" class="${x.sm?'sm ':''}${x===tab?'on':''}"><b>${x.t}</b><span>${x.s}</span></a>`;
+ const grps=[];P.tabs.forEach(x=>{if(x.hdr||!x.sm||!grps.length)grps.push({h:x,kids:[]});else grps[grps.length-1].kids.push(x)});
+ const side=grps.map(g=>{const id=p+':'+(g.h.hdr||g.h.k),has=g.kids.length>0,open=!COL[id]||g.kids.includes(tab)||g.h===tab;
+  const row=g.h.hdr?`<h4 class="hdr">${g.h.hdr}</h4>`:lnk(g.h);
+  return `<div class="grp${has&&!open?' col':''}" data-id="${id}"><div class="prow">${row}${has?`<button class="tg" aria-label="Collapse or expand" aria-expanded="${open}">▾</button>`:''}</div>${has?`<div class="kids">${g.kids.map(lnk).join('')}</div>`:''}</div>`}).join('');
  app.innerHTML=`<div class="sub"><aside><h1>${P.n}</h1>${side}</aside><section class="pane"><h2>${tab.t}<small>${tab.s}</small></h2></section></div>`;
+ app.querySelectorAll('.tg').forEach(b=>b.onclick=()=>{const g=b.closest('.grp'),c=g.classList.toggle('col');b.setAttribute('aria-expanded',!c);COL[g.dataset.id]=c?1:0;try{localStorage.setItem('sidecol',JSON.stringify(COL))}catch(e){}});
  const pane=$('.pane',app);if(tab.inspo)pane.classList.add('nohead');
  if(tab.web)pane.append(viewer([],gEmbed(tab.web),/google\.com/.test(tab.web)?tab.web:undefined));
  else if(tab.docs)pane.append(docsPane(tab));

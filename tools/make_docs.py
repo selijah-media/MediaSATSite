@@ -88,12 +88,12 @@ class Ctx:
         self.drive, self.fetch, self.tmp = drive, fetch, tmp or tempfile.mkdtemp()
         self.soffice = shutil.which('soffice') or shutil.which('libreoffice')
 
-def item(ctx, f):
+def item0(ctx, f):
     """Returns dict(t, p, th, dl) for one Drive file, or None."""
     n, fid, m = f['name'], f['id'], f.get('mimeType', '')
     e = ext(n); t = title_of(n)
     if n.lower() in ('links.txt', 'thumbs.db', '.ds_store') or n.startswith('~$'): return None
-    dl = 'https://drive.google.com/uc?export=download&id=' + fid
+    dl = 'https://drive.usercontent.google.com/download?id=' + fid + '&export=download&confirm=t'
     if e == '.pdf' or m.endswith('/pdf'):
         pdf = os.path.join(ctx.tmp, fid + '.pdf')
         if ctx.fetch(fid, pdf, b'%PDF'):
@@ -121,22 +121,64 @@ def item(ctx, f):
     # videos, Office files without a converter, anything else Drive can preview
     return dict(t=t, p=[{'s': ds.prev(fid), 'l': []}], th=ds.thumb(fid).replace('w2000', 'w400'), dl=dl)
 
-def folder_docs(ctx, fid, depth=0):
+DLT = {'.pdf': '⬇ Download PDF', '.pptx': '⬇ Download PowerPoint (.pptx)', '.ppt': '⬇ Download PowerPoint (.ppt)', '.docx': '⬇ Download Word (.docx)',
+       '.doc': '⬇ Download Word (.doc)', '.xlsx': '⬇ Download Excel (.xlsx)', '.xls': '⬇ Download Excel (.xls)'}
+def dl_url(fid): return 'https://drive.usercontent.google.com/download?id=' + fid + '&export=download&confirm=t'
+def item(ctx, f):
+    d = item0(ctx, f)
+    if d and d.get('dl'): d['dlt'] = DLT.get(ext(f['name']), '⬇ Download')
+    return d
+
+def file_docs(ctx, files):
+    """One tile per file. A PDF and a PowerPoint/Word/Excel file with the same name become ONE tile:
+    students read the PDF, and the download button gives them the editable PowerPoint/Word/Excel file."""
+    docs, groups = [], {}
+    for f in files: groups.setdefault(os.path.splitext(f['name'].lower())[0].strip(), []).append(f)
+    for stem, fs in groups.items():
+        pdfs = [f for f in fs if ext(f['name']) == '.pdf']; offs = [f for f in fs if ext(f['name']) in OFFICE + ('.xlsx', '.xls')]
+        if pdfs and offs:
+            d = item(ctx, pdfs[0])
+            if d:
+                d['dl'] = dl_url(offs[0]['id']); d['dlt'] = DLT.get(ext(offs[0]['name']), '⬇ Download'); docs.append(d)
+                for f in fs:
+                    if f not in (pdfs[0], offs[0]):
+                        x = item(ctx, f)
+                        if x: docs.append(x)
+                continue
+        for f in fs:
+            x = item(ctx, f)
+            if x: docs.append(x)
+    return docs
+
+def folder_docs(ctx, fid, depth=0, flatten=False):
     """Every file becomes a tile; every sub-folder becomes ONE tile holding all of its files."""
     docs = []
     kids = sorted((ds.resolve(k) for k in ctx.drive.children(fid)), key=lambda k: ds.nkey(k['name']))
+    docs += file_docs(ctx, [k for k in kids if k['mimeType'] != ds.FOLDER])
+    for k in kids:
+        if k['mimeType'] != ds.FOLDER or depth >= 3: continue
+        inner = folder_docs(ctx, k['id'], depth + 1, flatten)
+        if not inner: continue
+        if flatten: docs += inner; continue
+        pages = [pg for d in inner for pg in d['p']]
+        name = re.sub(r'^samples?\s*[-–:]\s*', '', k['name'], flags=re.I).strip() or k['name']
+        docs.append(dict(t=name, p=pages, th=inner[0].get('th')))
+    return docs
+
+def form_split(ctx, fid):
+    """{'*': tiles for every media form, 'video': tiles for Video only, ...}. Folders named after a media form are split out."""
+    out = {'*': []}; loose = []
+    kids = sorted((ds.resolve(k) for k in ctx.drive.children(fid)), key=lambda k: ds.nkey(k['name']))
     for k in kids:
         if k['mimeType'] == ds.FOLDER:
-            if depth >= 3: continue
-            inner = [d for d in folder_docs(ctx, k['id'], depth + 1)]
-            if not inner: continue
-            pages = [pg for d in inner for pg in d['p']]
-            name = re.sub(r'^samples?\s*[-–:]\s*', '', k['name'], flags=re.I).strip() or k['name']
-            docs.append(dict(t=name, p=pages, th=inner[0].get('th')))
-        else:
-            d = item(ctx, k)
-            if d: docs.append(d)
-    return docs
+            forms = ds.parse_forms(k['name'])
+            if forms:
+                docs = folder_docs(ctx, k['id'], 1, True)
+                for fm in forms: out.setdefault(fm, []).extend(docs)
+            else: out['*'] += folder_docs(ctx, k['id'], 1, True)
+        else: loose.append(k)
+    out['*'] = file_docs(ctx, loose) + out['*']
+    return {k: v for k, v in out.items() if v}
 
 def find_child(ctx, fid, pred):
     for k in ctx.drive.children(fid):
@@ -159,8 +201,12 @@ def sat_packs(ctx, fid, res):
     for k in sorted((ds.resolve(x) for x in ctx.drive.children(fid)), key=lambda x: ds.nkey(x['name'])):
         m = re.search(r'pack\s*([123])\b', ds.nz(k['name']))
         if not m or k['mimeType'] != ds.FOLDER: continue
-        n = m.group(1)
-        for c in sorted((ds.resolve(x) for x in ctx.drive.children(k['id'])), key=lambda x: ds.nkey(x['name'])):
+        one_pack(ctx, k['id'], m.group(1), res)
+
+def one_pack(ctx, pid, n, res):
+    loose = []
+    if True:
+        for c in sorted((ds.resolve(x) for x in ctx.drive.children(pid)), key=lambda x: ds.nkey(x['name'])):
             nm = ds.nz(c['name'])
             if c['mimeType'] == ds.FOLDER and 'criteria' in nm:
                 res['c'][n] = folder_docs(ctx, c['id'])
@@ -171,15 +217,18 @@ def sat_packs(ctx, fid, res):
                     if not forms: log.append('  folder "%s" in Student Samples is not a media form name, skipped' % ff['name']); continue
                     docs = folder_docs(ctx, ff['id'])
                     for fm in forms: res['s'].setdefault(n, {}).setdefault(fm, []).extend(docs)
-            elif c['mimeType'] != ds.FOLDER:
-                d = item(ctx, c)
-                if d: res['c' if 'criteria' in nm else 'pk'].setdefault(n, []).append(d)
+            elif c['mimeType'] == ds.FOLDER:
+                fs = form_split(ctx, c['id'])
+                if fs: res['x'].setdefault(n, []).append({'n': c['name'], 'f': fs})
+            else: loose.append(c)
+        for d in file_docs(ctx, loose):
+            res['c' if 'criteria' in ds.nz(d['t']) else 'pk'].setdefault(n, []).append(d)
         for key in ('c', 'pk'):
             if n in res[key] and not res[key][n]: del res[key][n]
 
 def build(drive, folders, root_id, fetch=fetch_default):
     ctx = Ctx(drive, fetch)
-    res = dict(status='ok', td=[], cr=[], c={}, pk={}, s={})
+    res = dict(status='ok', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={})
     shutil.rmtree(OUT_DIR, ignore_errors=True)
     def pick(key, names):
         fid = folders.get(key)
@@ -188,12 +237,20 @@ def build(drive, folders, root_id, fetch=fetch_default):
         return fid
     for key, names, fn in (('topdesign', ('top design',), lambda fid: res.update(td=top_design(ctx, fid))),
                            ('copyright', ('copyright',), lambda fid: res.update(cr=folder_docs(ctx, fid))),
-                           ('satpacks', ('sat packs', 'sat pack'), lambda fid: sat_packs(ctx, fid, res))):
+                           ('satpacks', ('sat packs', 'sat pack'), lambda fid: sat_packs(ctx, fid, res)),
+                           ('appendix', ('appendix',), lambda fid: res.update(ap=form_split(ctx, fid)))):
         fid = pick(key, names)
+        if key == 'satpacks' and not fid and any(folders.get('pack' + n) for n in '123'): fid = 'none'
         if not fid: log.append('%s: folder not found. Paste its link into tools/drive_folders.json' % key); continue
         try:
-            fn(fid)
-            cnt = len(res['td']) if key == 'topdesign' else len(res['cr']) if key == 'copyright' else sum(len(v) for v in res['c'].values()) + sum(len(d) for v in res['s'].values() for d in v.values()) + sum(len(v) for v in res['pk'].values())
+            if fid != 'none': fn(fid)
+            if key == 'satpacks':
+                for n in '123':
+                    if folders.get('pack' + n):
+                        for kk in ('c', 'pk'): res[kk].pop(n, None)
+                        res['s'].pop(n, None); res['x'].pop(n, None)
+                        one_pack(ctx, folders['pack' + n], n, res)
+            cnt = len(res['td']) if key == 'topdesign' else len(res['cr']) if key == 'copyright' else sum(len(v) for v in res['c'].values()) + sum(len(d) for v in res['s'].values() for d in v.values()) + sum(len(v) for v in res['pk'].values()) + sum(len(e['f'].get('*', [])) for v in res['x'].values() for e in v) if key == 'satpacks' else sum(len(v) for v in res['ap'].values())
             log.append('%s: %d document(s)' % (key, cnt))
         except Exception as ex:
             res['status'] = 'error'; log.append('%s: ERROR %s' % (key, ex))
@@ -209,7 +266,7 @@ def main():
     drive = ds.Drive(key) if key else ds.PublicDrive()
     try: res = build(drive, folders, os.environ.get('DRIVE_ROOT_FOLDER_ID'))
     except Exception as ex:
-        res = dict(status='error', td=[], cr=[], c={}, pk={}, s={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
+        res = dict(status='error', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
     open(os.path.join(ROOT, 'assets', 'drivedocs.js'), 'w').write('const DRIVEDOCS=' + json.dumps(res, ensure_ascii=False) + ';')
     print('### Documents from Google Drive (Top Design, Copyright, SAT Packs)')
     for l in log: print(l)

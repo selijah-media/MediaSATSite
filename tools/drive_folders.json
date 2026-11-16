@@ -1,6 +1,10 @@
 {
-  "_help": "Folder links (or IDs) for the documents the site reads from Google Drive. Leave satpacks empty to find a folder called SAT PACKS inside the root folder.",
+  "_help": "Folder links (or IDs) the site reads from Google Drive. pack1/2/3 are the SAT PACK 1/2/3 folders themselves.",
   "topdesign": "13ow889Was5ETDZKOm3O2Csw5XUjc5FKz",
   "copyright": "1oOskiIEAcBa8X6hFh9uIRkcZ0SqVQyGd",
-  "satpacks": "19YLs9qu18yyAzGT0SSmBTJ0ZVwiNYErG"
+  "satpacks": "19YLs9qu18yyAzGT0SSmBTJ0ZVwiNYErG",
+  "pack1": "1mJ0o7MW9nuRKq1Re9pBZcbwqVtMCjPSU",
+  "pack2": "1SbfrRxUIC5nm9pinHRULMVL_4NCCJv5N",
+  "pack3": "1q47vX3IfunZ3vWHYCvogLMOC0eeRmHSX",
+  "appendix": "1Xj1a23fkI98B9PS9RzvmX5qevBoW0RKC"
 }
