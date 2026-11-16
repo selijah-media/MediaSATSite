@@ -80,6 +80,7 @@ def tree_to_mock(tree):
             if c.get('mimeType') == drive_scan.FOLDER: index(c)
         mock[node['id']] = kids
     index(tree); return mock
+DRIVE_STATUS = 'off'
 try:
     if os.environ.get('DRIVE_LIST_URL'):
         tree = fetch_tree(os.environ['DRIVE_LIST_URL'])
@@ -91,10 +92,15 @@ try:
         drive, root_id = drive_scan.PublicDrive(), os.environ['DRIVE_ROOT_FOLDER_ID']
     else: drive = None
     if drive:
+        n_drive = 0
         for forms, it in drive_scan.scan(drive, root_id, report):
+            n_drive += 1
             for f in forms: out[f].append(dict(it))
+        DRIVE_STATUS = ('ok:%d' % n_drive) if n_drive else 'empty'
     else: report.append('Google Drive not connected yet (see README: add the DRIVE_ROOT_FOLDER_ID variable).')
-except Exception as e: report.append('GOOGLE DRIVE ERROR (the site was still built without Drive items): %s' % e)
+except Exception as e:
+    DRIVE_STATUS = 'error'
+    report.append('GOOGLE DRIVE ERROR (the site was still built without Drive items): %s' % e)
 also = os.path.join(base, 'also.txt')
 if os.path.exists(also):
     for line in open(also, encoding='utf-8'):
@@ -184,10 +190,22 @@ if online():
         out[f] = [it for it in out[f] if not (it['type'] == 'link' and it['src'] in dead)]
     report.append('Embeddable: %d, blocks embedding: %d, unknown: %d' % (sum(EMBED.values()), len(EMBED) - sum(EMBED.values()), len(ul) - len(EMBED) - len(dead)))
 else: report.append('Offline: link check skipped (it runs on GitHub when the site is deployed).')
+GEN = re.compile(r'^(ig[\s._-]?media|screenshot|screen[\s._-]?(shot|recording)|whatsapp|untitled)|^(vid|video|photo|image|img|mov|dsc|pxl|pic)[\s._-]?[\d\s._()-]*$|^\d{4}[-._]\d{2}[-._]\d{2}|^[0-9a-f]{12,}$|^[\d\s._()-]+$', re.I)
+for f in FORMS:   # auto-generated file names (ig.media..., IMG_1234) are replaced by the folder name
+    for it in out[f]:
+        if it['type'] in ('video', 'image', 'audio', 'pdf', 'file') and GEN.match(it['title']):
+            c = it['cats'][0]; it['title'] = c[1].split(' / ')[-1] if c[1] else c[0]; it['_gen'] = 1
+    grp = {}
+    for it in out[f]:
+        if it.get('_gen'): grp.setdefault((it['title'], tuple(it['cats'][0][:2])), []).append(it)
+    for g in grp.values():
+        if len(g) > 1:
+            for n, it in enumerate(sorted(g, key=lambda x: nkey(x['src'])), 1): it['title'] = '%s %d' % (it['title'], n)
+    for it in out[f]: it.pop('_gen', None)
 for f in FORMS:
     for it in out[f]: it.pop('_rel', None)
     out[f].sort(key=lambda x: (x['cats'][0][0].lower(), x['cats'][0][1].lower(), x['title'].lower()))
 with open(os.path.join(root, 'assets', 'inspiration.js'), 'w', encoding='utf-8') as fh:
-    fh.write('const INSPO=' + json.dumps(out, ensure_ascii=False) + ';\nconst EMBED=' + json.dumps(EMBED) + ';')
+    fh.write('const INSPO=' + json.dumps(out, ensure_ascii=False) + ';\nconst EMBED=' + json.dumps(EMBED) + ';\nconst DRIVE_STATUS=' + json.dumps(DRIVE_STATUS) + ';')
 open(os.path.join(root, 'assets', 'link-report.txt'), 'w').write('\n'.join(report) + '\n')
 print({k: len(v) for k, v in out.items()}); print('\n'.join(report))

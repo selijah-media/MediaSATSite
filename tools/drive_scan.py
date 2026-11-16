@@ -132,7 +132,9 @@ def scan(drive, root, report):
             elif k == 'image': it = dict(title=title, type='image', src=thumb(f['id']), drive=1)
             elif k == 'gdoc': it = dict(title=title, type='link', src='https://drive.google.com/open?id=' + f['id'], drive=1)
             else: it = dict(title=title, type='file', src='https://drive.google.com/file/d/%s/view' % f['id'], drive=1)
-            it.update(cats=cats, _rel=rel); result.append((forms, it))
+            it.update(cats=cats, _rel=rel)
+            if k in ('video', 'image', 'pdf', 'audio'): it['tid'] = f['id']
+            result.append((forms, it))
     def do_set(folder, parts, top, forms):
         kids = [resolve(k) for k in drive.children(folder['id'])]
         media = [k for k in kids if k['mimeType'] != FOLDER and kind(k['mimeType'], k['name']) in ('image', 'video') and not k['name'].startswith('.')]
@@ -140,7 +142,7 @@ def scan(drive, root, report):
         if not media: report.append('Empty set folder: %s/%s' % ('/'.join(parts), folder['name'])); return
         srcs = [thumb(k['id']) if kind(k['mimeType'], k['name']) == 'image' else prev(k['id']) for k in media]
         title = nice(set_title(folder['name']) or (parts[-1] if parts else 'Set'))
-        result.append((forms, dict(title=title, type='set', srcs=srcs, drive=1, cats=cats_from(parts), _rel='/'.join([top] + parts).lower())))
+        result.append((forms, dict(title=title, type='set', srcs=srcs, drive=1, tid=media[0]['id'], cats=cats_from(parts), _rel='/'.join([top] + parts).lower())))
     root_kids = drive.children(root)
     if not root_kids:
         report.append('The root Drive folder returned nothing. Check it is shared as "Anyone with the link: Viewer" and that DRIVE_ROOT_FOLDER_ID is the folder ID. (In no-key mode Google may also have changed or blocked its public folder page: see README Option B.)')

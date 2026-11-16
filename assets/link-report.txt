@@ -1,0 +1,2 @@
+Google Drive not connected yet (see README: add the DRIVE_ROOT_FOLDER_ID variable).
+Offline: link check skipped (it runs on GitHub when the site is deployed).

@@ -47,6 +47,16 @@ After this the site rebuilds every night (and whenever you press Run workflow) s
 - **New categories:** a new folder inside Media Codes, Media Conventions or Media Production Process appears automatically under that group in the menu. Empty folders stay hidden until they hold something.
 - Folder names are matched to the menu groups in `index.html` (the `GROUPS` list). A category that is not in the list shows as its own button, never under "Other". Tell Claude where it belongs.
 
+## SAT Packs and Student Samples
+Each media form page has Pack 1 to 3 and Student Samples 1 to 3. Open `assets/packs.js` and paste a link between the quotes (a Google Drive file link set to "Anyone with the link"; a list of `['Title','link']` pairs for several sample files; or a Drive folder link). Empty ones show "Coming soon".
+
+## Other tips
+- **Auto-generated file names** (ig.media..., IMG_1234, Screenshot...) are not shown. The card uses the folder name instead, numbered if there are several. Give a file a real name to keep it.
+- **Sets:** a Drive folder whose name starts with `Set` (any capitals) is shown as one slide set.
+- **General Resources** (websites for all media forms) lives in `inspiration/all/General resources/links.txt`.
+- **The SAT page:** Study Design, Constraints, SAT Criteria, VCAA Top Design (2025, 2024), Copyright, Equipment Catalogue and Inspirations (always last). The pages are images in `assets/pdf/` with clickable links.
+- **GitHub tool versions** in `.github/workflows/deploy.yml` (checkout v7, configure-pages v6, upload-pages-artifact v5, deploy-pages v5) were current in November 2026. If a deploy ever fails with "No artifacts named github-pages", update these to the newest versions.
+
 ## Notes
 - Drive videos play in Google's player (click to play, no autoplay). They can take a few minutes to work after upload.
 - The viewer's thumbnail strip shows titles and icons only.
