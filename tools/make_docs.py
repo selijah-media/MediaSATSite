@@ -257,10 +257,11 @@ def one_pack(ctx, pid, n, res):
         for key in ('c', 'pk'):
             if n in res[key] and not res[key][n]: del res[key][n]
 
+SLIDES = []
 def build(drive, folders, root_id, fetch=fetch_default):
     ctx = Ctx(drive, fetch)
     del log[:]
-    res = dict(status='ok', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={})
+    res = dict(status='ok', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={}, sl={})
     shutil.rmtree(OUT_DIR, ignore_errors=True)
     def pick(key, names):
         fid = folders.get(key)
@@ -286,6 +287,12 @@ def build(drive, folders, root_id, fetch=fetch_default):
             log.append('%s: %d document(s)' % (key, cnt))
         except Exception as ex:
             res['status'] = 'error'; log.append('%s: ERROR %s' % (key, ex))
+    for fid in SLIDES:   # Inspiration PDFs that should be flipped through as slides instead of scrolled
+        try:
+            d = item0(ctx, {'name': fid + '.pdf', 'id': fid, 'mimeType': 'application/pdf'})
+            if d and d.get('p') and 'assets/dd/' in d['p'][0]['s']: res['sl'][fid] = d['p']; log.append('slides: %s (%d pages)' % (fid, len(d['p'])))
+            else: log.append('slides: %s could not be converted' % fid)
+        except Exception as ex: log.append('slides: %s ERROR %s' % (fid, ex))
     return res
 
 def main():
@@ -299,12 +306,13 @@ def main():
     for k, v in folders.items():
         m = re.search(r'folders/([\w-]+)', v)
         if m: folders[k] = m.group(1)
+    SLIDES[:] = [re.sub(r'.*/d/([\w-]+).*', r'\1', x) for x in cfg.get('slide_pdfs', [])]
     ORDER[:] = [x.lower() for x in cfg.get('menu_order', [])]
     key = os.environ.get('DRIVE_API_KEY')
     drive = ds.Drive(key) if key else ds.PublicDrive()
     try: res = build(drive, folders, os.environ.get('DRIVE_ROOT_FOLDER_ID'))
     except Exception as ex:
-        res = dict(status='error', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
+        res = dict(status='error', td=[], cr=[], c={}, pk={}, s={}, x={}, ap={}, sl={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
     res['log'] = log[:60]
     try:   # stamp the page so browsers always fetch the newest data
         ip = os.path.join(ROOT, 'index.html'); h = open(ip, encoding='utf-8').read()
