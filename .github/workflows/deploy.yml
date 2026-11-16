@@ -19,16 +19,22 @@ jobs:
       name: github-pages
       url: ${{ steps.d.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Build inspiration list
         env:
           DRIVE_LIST_URL: ${{ secrets.DRIVE_LIST_URL }}
           DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
           DRIVE_ROOT_FOLDER_ID: ${{ vars.DRIVE_ROOT_FOLDER_ID }}
         run: python3 tools/make_manifest.py | tee -a "$GITHUB_STEP_SUMMARY"
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - name: Build documents from Google Drive
+        continue-on-error: true
+        env:
+          DRIVE_API_KEY: ${{ secrets.DRIVE_API_KEY }}
+          DRIVE_ROOT_FOLDER_ID: ${{ vars.DRIVE_ROOT_FOLDER_ID }}
+        run: python3 tools/make_docs.py | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: .
       - id: d
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
