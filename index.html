@@ -160,23 +160,26 @@ aside .hdr{margin:16px 12px 4px;font:700 12px 'DM Sans',sans-serif;text-transfor
 <script src="assets/data.js"></script>
 <script src="assets/inspiration.js"></script>
 <script src="assets/packs.js"></script>
+<script src="assets/drivedocs.js"></script>
 <script>
 const LOGO="assets/logo.jpg";
 const NOEMBED=["studiobinder.com","metrotrains.com.au","youtube.com","starnow.com"];
+const DD=(typeof DRIVEDOCS!=='undefined'&&DRIVEDOCS)||{};
+const ddl=(a)=>Array.isArray(a)&&a.length?{docs:a}:null;
 const packs=f=>{
  const P=(typeof PACKS!=='undefined'&&PACKS[f])||{};
  const g=k=>{const v=P[k];return typeof v==='string'&&v?{web:v}:Array.isArray(v)&&v.length?{docs:v.map(x=>({t:x[0],u:x[1]}))}:{pages:[]}};
  return [
  {k:'in',t:'Inspiration',s:'Videos and images',inspo:[]},
- {k:'p1',t:'SAT Pack 1',s:'U3 AOS 2 Research, Development and Experimentation',...(P.p1?g('p1'):{pages:DOCS.p1})},
- {k:'c1',t:'SAT 1 Criteria',s:'Unit 3 Outcome 2',sm:1,pages:DOCS.c1},
- {k:'s1',t:'Student Samples',s:'For Pack 1',sm:1,...(!(P.s1&&P.s1.length)&&DOCS.s1&&DOCS.s1[f]?{docs:DOCS.s1[f]}:g('s1'))},
- {k:'p2',t:'SAT Pack 2',s:'U3 AOS 3 Pre-production Planning',...g('p2')},
- {k:'c2',t:'SAT 2 Criteria',s:'Unit 3 Outcome 3',sm:1,pages:DOCS.c2},
- {k:'s2',t:'Student Samples',s:'For Pack 2',sm:1,...g('s2')},
- {k:'p3',t:'SAT Pack 3',s:'U4 AOS 1 Media Production',...g('p3')},
- {k:'c3',t:'SAT 3 Criteria',s:'Unit 4 Outcome 1',sm:1,pages:DOCS.c3},
- {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,...g('s3')}]};
+ {k:'p1',t:'SAT Pack 1',s:'U3 AOS 2 Research, Development and Experimentation',...(ddl((DD.pk||{})[1])||(P.p1?g('p1'):{pages:DOCS.p1}))},
+ {k:'c1',t:'SAT 1 Criteria',s:'Unit 3 Outcome 2',sm:1,...(ddl((DD.c||{})[1])||{pages:DOCS.c1})},
+ {k:'s1',t:'Student Samples',s:'For Pack 1',sm:1,...(ddl(((DD.s||{})[1]||{})[f])||(!(P.s1&&P.s1.length)&&DOCS.s1&&DOCS.s1[f]?{docs:DOCS.s1[f]}:g('s1')))},
+ {k:'p2',t:'SAT Pack 2',s:'U3 AOS 3 Pre-production Planning',...(ddl((DD.pk||{})[2])||g('p2'))},
+ {k:'c2',t:'SAT 2 Criteria',s:'Unit 3 Outcome 3',sm:1,...(ddl((DD.c||{})[2])||{pages:DOCS.c2})},
+ {k:'s2',t:'Student Samples',s:'For Pack 2',sm:1,...(ddl(((DD.s||{})[2]||{})[f])||g('s2'))},
+ {k:'p3',t:'SAT Pack 3',s:'U4 AOS 1 Media Production',...(ddl((DD.pk||{})[3])||g('p3'))},
+ {k:'c3',t:'SAT 3 Criteria',s:'Unit 4 Outcome 1',sm:1,...(ddl((DD.c||{})[3])||{pages:DOCS.c3})},
+ {k:'s3',t:'Student Samples',s:'For Pack 3',sm:1,...(ddl(((DD.s||{})[3]||{})[f])||g('s3'))}]};
 /* To add content later: put image/page sources in `pages` (PDF pages as images) or items in `inspo`,
    e.g. {type:'video',src:'https://youtu.be/…',title:'…'} or {type:'image',src:'…',title:'…'} */
 const PAGES={
@@ -184,12 +187,10 @@ const PAGES={
   {k:'sd',t:'VCE Media Study Design',s:'Units 3 and 4, pages 26–36',pages:SD},
   {k:'cs',t:'Constraints of the SAT',s:'What you can and can’t do',pages:CS},
   {k:'cr',t:'SAT Criteria',s:'2026 VCAA administrative information',pages:DOCS.adm},
-  {k:'cp',t:'Copyright',s:'Guides, permission and templates',docs:[{t:'VCAA copyright page',u:'https://www.vcaa.vic.edu.au/news-and-events/events-and-awards/season-excellence/copyright'},...DOCS.cr]},
+  {k:'cp',t:'Copyright',s:'Guides, permission and templates',docs:[{t:'VCAA copyright page',u:'https://www.vcaa.vic.edu.au/news-and-events/events-and-awards/season-excellence/copyright'},...(DD.cr||[])]},
   {k:'eq',t:'Equipment Catalogue',s:'Canva catalogue',web:'https://www.canva.com/design/DAHPygjWsvU/siDFrwDVjBWRnxNtUVFXeQ/view?embed'},
   {k:'in',t:'Inspirations',s:'Random pick from every media form',inspo:[]},
-  {hdr:'VCAA Top Design'},
-  {k:'t25',t:'2025',s:'Annotated folio pages',sm:1,pages:DOCS.t25},
-  {k:'t24',t:'2024',s:'Annotated folio pages',sm:1,pages:DOCS.t24}]},
+  ...((DD.td||[]).length?[{hdr:'VCAA Top Design'},...DD.td.map((d,i)=>({k:'td'+i,t:d.t,s:d.n&&d.n!==d.t?d.n:'Annotated folio pages',sm:1,docs:[d]}))]:[])]},
  video:{n:'Video',c:'#eea857',tabs:packs('video')},
  animation:{n:'Animation',c:'#f7c85a',tabs:packs('animation')},
  print:{n:'Print',c:'#8667b4',tabs:packs('print')},
@@ -207,7 +208,7 @@ function viewer(pages,web,openUrl,onBack,dl,startW){
  let i=0,mode=startW?'width':'page',rel=1,w=web||null,wz=1,moved=0,ou=openUrl;
  const v=el('div','viewer',`<div class="bar"><button class="w bk" data-a="back">← Back to document</button><button class="d" data-a="prev" aria-label="Previous page">‹</button><span class="ct d"></span><button class="d" data-a="next" aria-label="Next page">›</button><i></i><a class="dlv d" hidden></a><i></i><button data-a="out" aria-label="Zoom out">−</button><span class="zl"></span><button data-a="in" aria-label="Zoom in">+</button><button data-a="page">Fit page</button><button class="d" data-a="width">Fit width</button><a class="nt w" target="_blank" rel="noopener">Open in new tab ↗</a></div><div class="wrap"><div class="stage d"><div class="pg"><img alt="Page"></div></div><div class="wb w"></div><button class="side l d" data-a="prev" aria-label="Previous page">‹</button><button class="side r d" data-a="next" aria-label="Next page">›</button></div>`);
  const dla=$('.dlv',v);if(dl){dla.hidden=false;dla.href=dl;dla.setAttribute('download','');dla.textContent=/\.docx?$/i.test(dl)?'⬇ Download template (.docx)':'⬇ Download'}
- const img=$('img',v),st=$('.stage',v),pg=$('.pg',v),fr=el('iframe'),vid=el('video');vid.controls=true;vid.playsInline=true;vid.hidden=true;pg.append(vid);const isVid=s=>/\.(mp4|mov|webm|m4v)$/i.test(s.split('?')[0]);const dfr=el('iframe');dfr.hidden=true;dfr.allow='autoplay; fullscreen';dfr.allowFullscreen=true;dfr.title='Video';pg.append(dfr);const isFrame=s=>/drive\.google\.com\/file\/d\/[^/]+\/preview/.test(s);fr.title='Embedded website';fr.allow='fullscreen';$('.wb',v).append(fr);
+ const img=$('img',v),st=$('.stage',v),pg=$('.pg',v),fr=el('iframe'),vid=el('video');vid.controls=true;vid.playsInline=true;vid.hidden=true;pg.append(vid);const isVid=s=>/\.(mp4|mov|webm|m4v)$/i.test(s.split('?')[0]);const dfr=el('iframe');dfr.hidden=true;dfr.allow='autoplay; fullscreen';dfr.allowFullscreen=true;dfr.title='Video';pg.append(dfr);const isFrame=s=>/drive\.google\.com\/file\/d\/[^/]+\/preview|docs\.google\.com\/(document|presentation|spreadsheets)\/d\/[^/]+\/(preview|embed)/.test(s);fr.title='Embedded website';fr.allow='fullscreen';$('.wb',v).append(fr);
  function draw(){if(!pages.length)return;vid.pause();const pf=isFrame(pages[i].s),pv=!pf&&isVid(pages[i].s);img.hidden=pf||pv;vid.hidden=!pv;dfr.hidden=!pf;if(pf)dfr.src=pages[i].s;else{dfr.removeAttribute('src');if(pv)vid.src=pages[i].s;else img.src=pages[i].s}if(pf)apply();pg.querySelectorAll('.hl').forEach(x=>x.remove());
   (pages[i].l||[]).forEach(([x,y,ww,h,t])=>{const a=el('a','hl');a.style.cssText=`left:${x}%;top:${y}%;width:${ww}%;height:${h}%`;a.dataset.t=t;a.href=typeof t==='string'?t:'#';a.title=typeof t==='string'?t:'Go to page '+(t+1);pg.append(a)})}
  function apply(){

@@ -61,3 +61,13 @@ Each media form page has Pack 1 to 3 and Student Samples 1 to 3. Open `assets/pa
 - Drive videos play in Google's player (click to play, no autoplay). They can take a few minutes to work after upload.
 - The viewer's thumbnail strip shows titles and icons only.
 - Link checking: on every build GitHub checks websites; dead ones are removed and listed in the run summary and `assets/link-report.txt`.
+
+## Documents from Google Drive (Top Design, Copyright, SAT Packs)
+`tools/make_docs.py` runs in the nightly build. It reads these public Drive folders, turns each PDF/Word file into page pictures
+(with clickable links) and publishes them with the site, so big PDFs never need uploading to GitHub.
+- `Top Design Files` -> "VCAA Top Design" menu (a year in the file name becomes the menu label, newest first)
+- `Copyright` -> tiles on the Copyright page
+- `SAT PACKS / SAT PACK 1 / SAT Criteria` -> "SAT 1 Criteria"; `Student Samples / <Video|Animation|Print|Audio|Photography>` -> Student Samples;
+  a PDF placed straight in `SAT PACK 1` becomes the Pack booklet. Same for SAT PACK 2 and 3.
+- A folder inside a media-form folder becomes ONE tile holding all its files (PDF pages, then videos).
+Folder links live in `tools/drive_folders.json`. Anything found in Drive replaces the copy stored in the repo.
