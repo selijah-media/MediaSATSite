@@ -199,6 +199,7 @@ const PAGES={
   {k:'sd',t:'VCE Media Study Design',s:'Units 3 and 4, pages 26–36',pages:SD},
   {k:'cs',t:'Constraints of the SAT',s:'What you can and can’t do',pages:CS},
   {k:'cr',t:'SAT Criteria',s:'2026 VCAA administrative information',pages:DOCS.adm},
+  ...(DD.mc||[]).map((d,i)=>({k:'mc'+i,t:d.t,s:'Slides',docs:[{...d,w:0}]})),
   {k:'cp',t:'Copyright',s:'Guides, permission and templates',docs:[{t:'VCAA copyright page',u:'https://www.vcaa.vic.edu.au/news-and-events/events-and-awards/season-excellence/copyright'},...(DD.cr||[])]},
   {k:'eq',t:'Equipment Catalogue',s:'Canva catalogue',web:'https://www.canva.com/design/DAHPygjWsvU/siDFrwDVjBWRnxNtUVFXeQ/view?embed'},
   {k:'in',t:'Inspirations',s:'Random pick from every media form',inspo:[]},
