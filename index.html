@@ -415,7 +415,7 @@ function docsPane(tab){
  if(!tab.docs.length)grid.append(el('div','empty','<big>📂</big><strong>Nothing here yet</strong><p>Documents added to the Google Drive folder appear here after the next nightly update.</p>'));
  return root}
 function sub(app,p,t){
- const P=PAGES[p],tab=P.tabs.find(x=>x.k===t)||P.tabs[0];
+ const P=PAGES[p],tab=(t&&P.tabs.find(x=>x.k===t))||P.tabs.find(x=>x.k&&!x.hdr)||P.tabs[0];
  document.documentElement.style.setProperty('--ac',P.c);
  const COL=(()=>{try{return JSON.parse(localStorage.getItem('sidecol2')||'{}')}catch(e){return{}}})();
  const lnk=x=>`<a href="#${p}-${x.k}" class="${x.sm?'sm ':''}${x===tab?'on':''}"><b>${x.t}</b><span>${x.s}</span></a>`;
