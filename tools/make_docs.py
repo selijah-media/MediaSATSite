@@ -251,6 +251,7 @@ def one_pack(ctx, pid, n, res):
             for i, e in enumerate(res['x'][n]):
                 e['first'] = 1 if i == 0 and re.match(r'\s*1\s*[.\-)]', e['n']) else 0
                 e['n'] = re.sub(r'^\s*\d+\s*[.\-)]\s*', '', e['n']).strip() or e['n']
+                e['n'] = re.sub(r'^\s*SAT\s*PACK\s*\d\s*[-\u2013\u2014:]\s*', '', e['n'], flags=re.I).strip() or e['n']   # the pack is already in the menu heading
             log.append('  SAT PACK %s menu items: %s' % (n, ', '.join(e['n'] for e in res['x'][n])))
         for d in file_docs(ctx, loose):
             res['c' if 'criteria' in ds.nz(d['t']) else 'pk'].setdefault(n, []).append(d)

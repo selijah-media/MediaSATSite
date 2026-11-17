@@ -172,7 +172,7 @@ const APPX_LINKS={audio:[{t:'Royalty free music and SFX',u:'https://selijah-medi
  video:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}],
  animation:[{t:'Royalty free music and SFX',u:'https://selijah-media.github.io/Mediaroyaltyfreemusicandsfx/'}]};
 const parx=(n,f)=>{const e=((DD.x||{})[n]||[])[0];return e&&e.first&&!((DD.pk||{})[n]||[]).length?{docs:[...(e.f['*']||[]),...(e.f[f]||[])]}:null};
-const xtabs=(n,f)=>((DD.x||{})[n]||[]).map((e,i)=>{const l=[...(e.f['*']||[]),...(e.f[f]||[])];return l.length?{k:'x'+n+'_'+i,t:e.n,s:'Pack '+n+' resources',sm:1,docs:l}:null}).filter(Boolean).filter((x,i,a)=>!(parx(n,f)&&x.k==='x'+n+'_0'));
+const xtabs=(n,f)=>((DD.x||{})[n]||[]).map((e,i)=>{const l=[...(e.f['*']||[]),...(e.f[f]||[])];return l.length?{k:'x'+n+'_'+i,t:e.n.replace(/^\s*SAT\s*PACK\s*\d\s*[-–—:]\s*/i,'')||e.n,s:'Pack '+n+' resources',sm:1,docs:l}:null}).filter(Boolean).filter((x,i,a)=>!(parx(n,f)&&x.k==='x'+n+'_0'));
 const appx=f=>({k:'ap',t:'Media Form - Appendix',s:'Documents to download',sm:1,docs:[...(APPX_LINKS[f]||[]),...((DD.ap||{})['*']||[]),...((DD.ap||{})[f]||[])]});
 const packs=f=>{
  const P=(typeof PACKS!=='undefined'&&PACKS[f])||{};
