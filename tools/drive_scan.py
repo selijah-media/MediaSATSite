@@ -102,6 +102,22 @@ def kind(m, name):
     if m == 'application/pdf': return 'pdf'
     if m.startswith('application/vnd.google-apps.'): return 'gdoc'
     return 'file'
+def parse_link(line, default):
+    """One line of a links list -> (title, url, cats) or None.
+       Title | https://...            (category = the folder the list sits in)
+       Title | https://... | Category / Sub-category
+       https://...                    (title = the website name)  Lines starting with # are notes."""
+    line = line.strip().lstrip('\ufeff')
+    if not line or line.startswith('#'): return None
+    parts = [x.strip() for x in line.split('|')]
+    if len(parts) == 1 and re.match(r'https?://\S+$', parts[0]):
+        host = re.sub(r'^www\.', '', re.sub(r'^https?://', '', parts[0]).split('/')[0]); return host, parts[0], default
+    if len(parts) < 2 or not re.match(r'https?://', parts[1]): return None
+    cats = default
+    if len(parts) > 2 and parts[2]:
+        cs = [x.strip() for x in parts[2].split('/') if x.strip()]
+        if cs: cats = [[nice(cs[0]), ' / '.join(nice(x) for x in cs[1:])]]
+    return parts[0], parts[1].split()[0], cats
 def cats_from(parts):
     eff, grp = list(parts), None
     if eff and nz(eff[0]) in GROUPS: grp = nice(eff[0]); eff = eff[1:]
@@ -122,8 +138,8 @@ def scan(drive, root, report):
             base = re.sub(r'\.[A-Za-z0-9]{2,4}$', '', f['name'])
             if re.match(r'^links?$', base.strip(), re.I) and (f['mimeType'] == GDOC or f['mimeType'].startswith('text/')):
                 for line in drive.text(f).splitlines():
-                    if '|' in line and line.split('|', 1)[1].strip().startswith('http'):
-                        t, l = line.split('|', 1); result.append((forms, dict(title=t.strip(), type='link', src=l.strip(), cats=cats, _rel=rel)))
+                    r = parse_link(line, cats)
+                    if r: result.append((forms, dict(title=r[0], type='link', src=r[1], cats=[list(c) for c in r[2]], _rel=rel)))
                 continue
             title = nice(base)
             if k == 'video': it = dict(title=title, type='video', src=prev(f['id']), drive=1)

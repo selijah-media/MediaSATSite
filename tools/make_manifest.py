@@ -44,9 +44,8 @@ def scan(d):
             e = os.path.splitext(n)[1].lower(); r = '/'.join([d] + parts + [n])
             if n.lower() == 'links.txt':
                 for line in open(os.path.join(dp, n), encoding='utf-8'):
-                    if '|' in line and line.split('|', 1)[1].strip().startswith('http'):
-                        t, l = line.split('|', 1)
-                        items.append(dict(title=t.strip(), type='link', src=l.strip(), cats=[[cat, sub]], _rel=r))
+                    q = drive_scan.parse_link(line, [[cat, sub]])
+                    if q: items.append(dict(title=q[0], type='link', src=q[1], cats=[list(c) for c in q[2]], _rel=r))
                 continue
             if n in imgs and (len(imgs) >= 2 or has_mk): continue
             typ = 'video' if e in VID else 'image' if e in IMG else 'audio' if e in AUD else 'pdf' if e == '.pdf' else 'file'
