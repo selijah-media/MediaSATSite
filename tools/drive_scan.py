@@ -114,9 +114,9 @@ def parse_link(line, default):
         host = re.sub(r'^www\.', '', re.sub(r'^https?://', '', parts[0]).split('/')[0]); return host, parts[0], default
     if len(parts) < 2 or not re.match(r'https?://', parts[1]): return None
     cats = default
-    if len(parts) > 2 and parts[2]:
-        cs = [x.strip() for x in parts[2].split('/') if x.strip()]
-        if cs: cats = [[nice(cs[0]), ' / '.join(nice(x) for x in cs[1:])]]
+    if len(parts) > 2:   # Title | link | [Group |] Category [| or / Sub-category]
+        cs = [y.strip() for x in parts[2:] for y in x.split('/') if y.strip()]
+        if cs: cats = cats_from(cs)
     return parts[0], parts[1].split()[0], cats
 def cats_from(parts):
     eff, grp = list(parts), None

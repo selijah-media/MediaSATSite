@@ -296,7 +296,8 @@ const GROUPS=[
  {n:'General Resources',t:[['General resources','Resources','Websites and tools']]}];
 const TMAP={},GOF={};
 GROUPS.forEach((g,gi)=>(g.t||[]).forEach(([n,...al])=>{GOF[n]=gi;TMAP[nz(n)]=n;al.forEach(a=>TMAP[nz(a)]=n)}));
-const topicOf=c=>TMAP[nz(c)]||c;
+const sing=s=>nz(s).split(' ').map(w=>w.length>3?w.replace(/s$/,''):w).join(' ');const TMAP2={};Object.keys(TMAP).forEach(k=>{TMAP2[sing(k)]=TMAP[k]});
+const topicOf=c=>TMAP[nz(c)]||TMAP2[sing(c)]||c;   // plural/singular and & / and differences still match
 const ICON={video:'🎬',audio:'🎧',pdf:'📄',file:'📎',link:'▶',image:'🖼️',set:'🖼️'};
 const TCOL={video:'#eea857',image:'#8667b4',set:'#8667b4',audio:'#4799d4',pdf:'#fb5f45',link:'#33bdb1',file:'#6b7088'};
 const TSVG={video:'<path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/>',image:'<rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-9 9"/>',set:'<rect x="7" y="3" width="14" height="12" rx="2"/><path d="M3 8v10a2 2 0 0 0 2 2h12"/>',audio:'<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',pdf:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',link:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',file:'<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>'};
