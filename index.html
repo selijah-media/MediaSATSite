@@ -197,7 +197,7 @@ const packs=f=>{
 const PAGES={
  sat:{n:'The SAT',c:'#fb5f45',tabs:[
   {k:'sd',t:'VCE Media Study Design',s:'Units 3 and 4, pages 26–36',pages:SD},
-  {k:'cs',t:'Constraints of the SAT',s:'What you can and can’t do',pages:CS},
+  {k:'cs',t:'Constraints of the SAT',s:'What you can and can’t do',...(ddl(DD.cs)||{pages:CS})},
   {k:'cr',t:'SAT Criteria',s:'2026 VCAA administrative information',pages:DOCS.adm},
   ...(DD.mc||[]).map((d,i)=>({k:'mc'+i,t:d.t,s:'Slides',docs:[{...d,w:0}]})),
   {k:'cp',t:'Copyright',s:'Guides, permission and templates',docs:[{t:'VCAA copyright page',u:'https://www.vcaa.vic.edu.au/news-and-events/events-and-awards/season-excellence/copyright'},...(DD.cr||[])]},
@@ -223,7 +223,7 @@ function viewer(pages,web,openUrl,onBack,dl,startW,dname,dlt){
  const dla=$('.dlv',v);
  const imgOnly=()=>pages.filter(pg=>!/drive\.google\.com\/file\/d\/|docs\.google\.com\/|\.(mp4|mov|webm|m4v)(\?|$)/i.test(pg.s));
  async function makePdf(){const old=dla.textContent;dla.textContent='Preparing PDF…';
-  try{if(!window.jspdf)await new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=ok;s.onerror=no;document.head.append(s)});
+  try{if(!window.jspdf){const ld=u=>new Promise((ok,no)=>{const s=document.createElement('script');s.src=u;s.onload=ok;s.onerror=no;document.head.append(s)});try{await ld('assets/jspdf.umd.min.js')}catch(e){await ld('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')}}
    const{jsPDF}=window.jspdf;let doc=null;const L=imgOnly();
    for(const pg of L){const im=await new Promise((ok,no)=>{const x=new Image();x.onload=()=>ok(x);x.onerror=no;x.src=pg.s});
     let data;try{const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);data=c.toDataURL('image/jpeg',.9)}catch(e){continue}
@@ -315,7 +315,7 @@ function media(it,play){
  else if(it.type==='video'){n=el('video');n.controls=true;n.playsInline=true;n.autoplay=!!play;n.src=it.src;if(play)Promise.resolve(n.play()).catch(()=>{n.muted=true;n.play().catch(()=>{})})}
  else if(it.type==='audio'){n=el('div','aud',`${tileIcon('audio',1)}<strong>${esc(it.title)}</strong>`);n.style.setProperty('--tc',TCOL.audio);const a=el('audio');a.controls=true;a.autoplay=!!play;a.src=it.src;n.append(a)}
  else if(it.type==='image'){n=el('img');n.alt=it.title;n.src=it.src}
- else if(it.type==='set')n=viewer(it.srcs.map((s,i)=>({s,l:(it.hot&&it.hot[i])||[]})));
+ else if(it.type==='set')n=viewer(it.srcs.map((s,i)=>({s,l:(it.hot&&it.hot[i])||[]})),undefined,undefined,undefined,it.dl,false,it.title,it.dl?'⬇ Download PDF':undefined);
  else if(it.type==='pdf'){n=el('iframe');n.title=it.title;n.src=it.src}
  else if(it.type==='link'&&embedUrl(it.src)){n=el('iframe');n.allow='autoplay; fullscreen';n.allowFullscreen=true;n.src=embedUrl(it.src).replace('autoplay=1','autoplay='+(play?1:0))}
  else if(it.type==='link'&&canEmbed(it.src))n=viewer([],gEmbed(it.src),it.src);
@@ -328,7 +328,7 @@ function inspoViewer(forms){
  forms.forEach(f=>(INSPO[f]||[]).forEach(x=>{const k=x.srcs?x.srcs[0]:x.src,m=M.get(k);
   if(m){m.forms.push(f);x.cats.forEach(c=>{if(!m.cats.some(d=>d[0]===c[0]&&d[1]===c[1]))m.cats.push([...c])})}
   else M.set(k,{...x,cats:x.cats.map(c=>[...c]),forms:[f]})}));
- const SLD=DD.sl||{};M.forEach(m=>{const sp=m.type==='pdf'&&m.tid&&SLD[m.tid];if(sp){m.type='set';m.srcs=sp.map(x=>x.s);m.hot=sp.map(x=>x.l||[]);m.drive=0}});
+ const SLD=DD.sl||{};M.forEach(m=>{const sp=m.type==='pdf'&&m.tid&&SLD[m.tid];if(sp){m.type='set';m.srcs=sp.map(x=>x.s);m.hot=sp.map(x=>x.l||[]);m.drive=0;m.dl='https://drive.usercontent.google.com/download?id='+m.tid+'&export=download&confirm=t'}});
  const all=[...M.values()];
  if(!all.length){root.className='empty';root.innerHTML=`<big>✨</big><strong>${forms.length>1?'Inspiration':PAGES[forms[0]].n+' inspiration'} is on its way</strong><p>Add files to the <code>inspiration/${forms.length>1?'&lt;media form&gt;':forms[0]}/</code> folder in the repo and they will appear here.</p>`;return root}
  let fsel='all',f={topic:'',cat:'',sub:''},q='',list=[],cur=null,hist=[],deck=[],open=new Set(),initOpen=true;
