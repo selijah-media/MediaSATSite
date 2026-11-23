@@ -203,7 +203,7 @@ const PAGES={
   {k:'cp',t:'Copyright',s:'Guides, permission and templates',docs:[{t:'VCAA copyright page',u:'https://www.vcaa.vic.edu.au/news-and-events/events-and-awards/season-excellence/copyright'},...(DD.cr||[])]},
   {k:'eq',t:'Equipment Catalogue',s:'Canva catalogue',web:'https://www.canva.com/design/DAHPygjWsvU/siDFrwDVjBWRnxNtUVFXeQ/view?embed'},
   {k:'in',t:'Inspirations',s:'Random pick from every media form',inspo:[]},
-  ...(()=>{const F=DD.fp||{},nm={video:'Video',animation:'Animation',print:'Print',audio:'Audio',photography:'Photography'},ks=Object.keys(nm).filter(f=>(F[f]||[]).length);return ks.length?[{hdr:'SAT Final Product Examples'},...ks.map(f=>({k:'fp'+f.slice(0,3),t:nm[f],s:'Final product examples',sm:1,docs:F[f]}))]:[{hdr:'SAT Final Product Examples'},{k:'fpe',t:'Coming soon',s:'Examples are added from Google Drive',sm:1,docs:[]}]})(),
+  ...(()=>{const F=DD.fp||{},nm={video:'Video',animation:'Animation',print:'Print',audio:'Audio',photography:'Photography',hybrid:'Hybridised Media'},ks=Object.keys(nm).filter(f=>(F[f]||[]).length);return ks.length?[{hdr:'SAT Final Product Examples'},...ks.map(f=>({k:'fp'+f.slice(0,3),t:nm[f],s:'Final product examples',sm:1,docs:F[f]}))]:[{hdr:'SAT Final Product Examples'},{k:'fpe',t:'Coming soon',s:'Examples are added from Google Drive',sm:1,docs:[]}]})(),
   ...((DD.td||[]).length?[{hdr:'VCAA Top Design'},...DD.td.map((d,i)=>({k:'td'+i,t:d.t,s:d.n&&d.n!==d.t?d.n:'Annotated folio pages',sm:1,docs:[d]}))]:[])]},
  video:{n:'Video',c:'#eea857',tabs:packs('video')},
  animation:{n:'Animation',c:'#f7c85a',tabs:packs('animation')},

@@ -226,7 +226,7 @@ def fp_split(ctx, fid):
     out = {}; kids = sorted((ds.resolve(k) for k in ctx.drive.children(fid)), key=lambda k: ds.nkey(k['name']))
     for k in kids:
         if k['mimeType'] != ds.FOLDER: continue
-        forms = ds.parse_forms(k['name'])
+        forms = ['hybrid'] if 'hybrid' in ds.nz(k['name']) else ds.parse_forms(k['name'])   # Hybridised Media only exists in this section
         if not forms: log.append('  final product folder "%s" is not a media form name, skipped' % k['name']); continue
         docs = fp_docs(ctx, k['id'])
         for fm in forms: out.setdefault(fm, []).extend(docs)
