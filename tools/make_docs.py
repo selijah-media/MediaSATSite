@@ -198,6 +198,40 @@ def form_split(ctx, fid):
     out['*'] = file_docs(ctx, loose) + out['*']
     return {k: v for k, v in out.items() if v}
 
+def fp_docs(ctx, fid, depth=0):
+    """Final product examples: every image/video is a tile; a folder whose name starts with "Set" is ONE tile that flips through its images and videos like slides."""
+    docs = []
+    kids = sorted((ds.resolve(k) for k in ctx.drive.children(fid)), key=lambda k: ds.nkey(k['name']))
+    def pg(k):
+        return {'s': ds.thumb(k['id']) if ds.kind(k['mimeType'], k['name']) == 'image' else ds.prev(k['id']), 'l': []}
+    for k in kids:
+        if k['mimeType'] == ds.FOLDER or k['name'].startswith('.'): continue
+        ty = ds.kind(k['mimeType'], k['name'])
+        if ty in ('image', 'video'):
+            docs.append(dict(t=title_of(k['name']), p=[pg(k)], th=ds.thumb(k['id']).replace('w2000', 'w400'), nodl=1))
+        elif ty == 'pdf':
+            d = item0(ctx, k)
+            if d: d.pop('dl', None); d['nodl'] = 1; docs.append(d)
+    for k in kids:
+        if k['mimeType'] != ds.FOLDER or depth >= 3: continue
+        if ds.is_set(k['name']):
+            media = sorted((ds.resolve(x) for x in ctx.drive.children(k['id']) if not x['name'].startswith('.')), key=lambda x: ds.nkey(x['name']))
+            media = [x for x in media if x['mimeType'] != ds.FOLDER and ds.kind(x['mimeType'], x['name']) in ('image', 'video')]
+            if not media: log.append('  Set folder "%s" has no images or videos' % k['name']); continue
+            docs.append(dict(t=ds.nice(ds.set_title(k['name'])) or k['name'], p=[pg(x) for x in media], th=ds.thumb(media[0]['id']).replace('w2000', 'w400'), nodl=1))
+        else: docs += fp_docs(ctx, k['id'], depth + 1)
+    return docs
+
+def fp_split(ctx, fid):
+    out = {}; kids = sorted((ds.resolve(k) for k in ctx.drive.children(fid)), key=lambda k: ds.nkey(k['name']))
+    for k in kids:
+        if k['mimeType'] != ds.FOLDER: continue
+        forms = ds.parse_forms(k['name'])
+        if not forms: log.append('  final product folder "%s" is not a media form name, skipped' % k['name']); continue
+        docs = fp_docs(ctx, k['id'])
+        for fm in forms: out.setdefault(fm, []).extend(docs)
+    return out
+
 def find_child(ctx, fid, pred):
     for k in ctx.drive.children(fid):
         k = ds.resolve(k)
@@ -262,7 +296,7 @@ SLIDES = []
 def build(drive, folders, root_id, fetch=fetch_default):
     ctx = Ctx(drive, fetch)
     del log[:]
-    res = dict(status='ok', td=[], cr=[], mc=[], cs=[], c={}, pk={}, s={}, x={}, ap={}, sl={})
+    res = dict(status='ok', td=[], cr=[], mc=[], cs=[], fp={}, c={}, pk={}, s={}, x={}, ap={}, sl={})
     shutil.rmtree(OUT_DIR, ignore_errors=True)
     def pick(key, names):
         fid = folders.get(key)
@@ -270,6 +304,7 @@ def build(drive, folders, root_id, fetch=fetch_default):
             fid = find_child(ctx, root_id, lambda n: any(x in n for x in names))
         return fid
     for key, names, fn in (('topdesign', ('top design',), lambda fid: res.update(td=top_design(ctx, fid))),
+                           ('finalproducts', ('final product',), lambda fid: res.update(fp=fp_split(ctx, fid))),
                            ('constraints', ('constraints',), lambda fid: res.update(cs=folder_docs(ctx, fid, flatten=True))),
                            ('mediacodes', ('media codes', 'conventions'), lambda fid: res.update(mc=folder_docs(ctx, fid, flatten=True))),
                            ('copyright', ('copyright',), lambda fid: res.update(cr=folder_docs(ctx, fid))),
@@ -286,7 +321,7 @@ def build(drive, folders, root_id, fetch=fetch_default):
                         for kk in ('c', 'pk'): res[kk].pop(n, None)
                         res['s'].pop(n, None); res['x'].pop(n, None)
                         one_pack(ctx, folders['pack' + n], n, res)
-            cnt = len(res['cs']) if key == 'constraints' else len(res['mc']) if key == 'mediacodes' else len(res['td']) if key == 'topdesign' else len(res['cr']) if key == 'copyright' else sum(len(v) for v in res['c'].values()) + sum(len(d) for v in res['s'].values() for d in v.values()) + sum(len(v) for v in res['pk'].values()) + sum(len(e['f'].get('*', [])) for v in res['x'].values() for e in v) if key == 'satpacks' else sum(len(v) for v in res['ap'].values())
+            cnt = sum(len(v) for v in res['fp'].values()) if key == 'finalproducts' else len(res['cs']) if key == 'constraints' else len(res['mc']) if key == 'mediacodes' else len(res['td']) if key == 'topdesign' else len(res['cr']) if key == 'copyright' else sum(len(v) for v in res['c'].values()) + sum(len(d) for v in res['s'].values() for d in v.values()) + sum(len(v) for v in res['pk'].values()) + sum(len(e['f'].get('*', [])) for v in res['x'].values() for e in v) if key == 'satpacks' else sum(len(v) for v in res['ap'].values())
             log.append('%s: %d document(s)' % (key, cnt))
         except Exception as ex:
             res['status'] = 'error'; log.append('%s: ERROR %s' % (key, ex))
@@ -315,7 +350,7 @@ def main():
     drive = ds.Drive(key) if key else ds.PublicDrive()
     try: res = build(drive, folders, os.environ.get('DRIVE_ROOT_FOLDER_ID'))
     except Exception as ex:
-        res = dict(status='error', td=[], cr=[], mc=[], cs=[], c={}, pk={}, s={}, x={}, ap={}, sl={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
+        res = dict(status='error', td=[], cr=[], mc=[], cs=[], fp={}, c={}, pk={}, s={}, x={}, ap={}, sl={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
     res['log'] = log[:60]
     try:   # stamp the page so browsers always fetch the newest data
         ip = os.path.join(ROOT, 'index.html'); h = open(ip, encoding='utf-8').read()

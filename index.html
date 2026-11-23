@@ -203,6 +203,7 @@ const PAGES={
   {k:'cp',t:'Copyright',s:'Guides, permission and templates',docs:[{t:'VCAA copyright page',u:'https://www.vcaa.vic.edu.au/news-and-events/events-and-awards/season-excellence/copyright'},...(DD.cr||[])]},
   {k:'eq',t:'Equipment Catalogue',s:'Canva catalogue',web:'https://www.canva.com/design/DAHPygjWsvU/siDFrwDVjBWRnxNtUVFXeQ/view?embed'},
   {k:'in',t:'Inspirations',s:'Random pick from every media form',inspo:[]},
+  ...(()=>{const F=DD.fp||{},nm={video:'Video',animation:'Animation',print:'Print',audio:'Audio',photography:'Photography'},ks=Object.keys(nm).filter(f=>(F[f]||[]).length);return ks.length?[{hdr:'SAT Final Product Examples'},...ks.map(f=>({k:'fp'+f.slice(0,3),t:nm[f],s:'Final product examples',sm:1,docs:F[f]}))]:[{hdr:'SAT Final Product Examples'},{k:'fpe',t:'Coming soon',s:'Examples are added from Google Drive',sm:1,docs:[]}]})(),
   ...((DD.td||[]).length?[{hdr:'VCAA Top Design'},...DD.td.map((d,i)=>({k:'td'+i,t:d.t,s:d.n&&d.n!==d.t?d.n:'Annotated folio pages',sm:1,docs:[d]}))]:[])]},
  video:{n:'Video',c:'#eea857',tabs:packs('video')},
  animation:{n:'Animation',c:'#f7c85a',tabs:packs('animation')},
@@ -216,7 +217,7 @@ $('#nav').innerHTML=Object.entries(PAGES).map(([k,p])=>`<a href="#${k}" data-p="
 let activeViewer=null;
 document.addEventListener('keydown',e=>{if(!activeViewer)return;if(e.key==='ArrowRight')activeViewer.go(1);if(e.key==='ArrowLeft')activeViewer.go(-1)});
 
-function viewer(pages,web,openUrl,onBack,dl,startW,dname,dlt){
+function viewer(pages,web,openUrl,onBack,dl,startW,dname,dlt,nodl){
  pages=pages.map(p=>typeof p==='string'?{s:p,l:[]}:p);
  let i=0,mode=startW?'width':'page',rel=1,w=web||null,wz=1,moved=0,ou=openUrl;
  const v=el('div','viewer',`<div class="bar"><button class="w bk" data-a="back">← Back to document</button><button class="d" data-a="prev" aria-label="Previous page">‹</button><span class="ct d"></span><button class="d" data-a="next" aria-label="Next page">›</button><i></i><a class="dlv d" hidden></a><i></i><button data-a="out" aria-label="Zoom out">−</button><span class="zl"></span><button data-a="in" aria-label="Zoom in">+</button><button data-a="page">Fit page</button><button class="d" data-a="width">Fit width</button><a class="nt w" target="_blank" rel="noopener">Open in new tab ↗</a></div><div class="wrap"><div class="stage d"><div class="pg"><img alt="Page"></div></div><div class="wb w"></div><button class="side l d" data-a="prev" aria-label="Previous page">‹</button><button class="side r d" data-a="next" aria-label="Next page">›</button></div>`);
@@ -233,7 +234,7 @@ function viewer(pages,web,openUrl,onBack,dl,startW,dname,dlt){
   }catch(e){alert('Sorry, the PDF could not be made. Try again, or use the Open link.')}
   dla.textContent=old}
  if(dl){dla.hidden=false;dla.href=dl;dla.setAttribute('download','');dla.textContent=dlt||(/\.docx?$/i.test(dl)?'⬇ Download template (.docx)':'⬇ Download')}
- else if(imgOnly().length){dla.hidden=false;dla.href='#';dla.textContent='⬇ Download PDF';dla.onclick=e=>{e.preventDefault();makePdf()}}
+ else if(imgOnly().length&&!nodl){dla.hidden=false;dla.href='#';dla.textContent='⬇ Download PDF';dla.onclick=e=>{e.preventDefault();makePdf()}}
  const img=$('img',v),st=$('.stage',v),pg=$('.pg',v),fr=el('iframe'),vid=el('video');vid.controls=true;vid.playsInline=true;vid.hidden=true;pg.append(vid);const isVid=s=>/\.(mp4|mov|webm|m4v)$/i.test(s.split('?')[0]);const dfr=el('iframe');dfr.hidden=true;dfr.allow='autoplay; fullscreen';dfr.allowFullscreen=true;dfr.title='Video';pg.append(dfr);const isFrame=s=>/drive\.google\.com\/file\/d\/[^/]+\/preview|docs\.google\.com\/(document|presentation|spreadsheets)\/d\/[^/]+\/(preview|embed)/.test(s);fr.title='Embedded website';fr.allow='fullscreen';$('.wb',v).append(fr);
  function draw(){if(!pages.length)return;vid.pause();const pf=isFrame(pages[i].s),pv=!pf&&isVid(pages[i].s);img.hidden=pf||pv;vid.hidden=!pv;dfr.hidden=!pf;if(pf)dfr.src=pages[i].s;else{dfr.removeAttribute('src');if(pv)vid.src=pages[i].s;else img.src=pages[i].s}if(pf)apply();pg.querySelectorAll('.hl').forEach(x=>x.remove());
   (pages[i].l||[]).forEach(([x,y,ww,h,t])=>{const a=el('a','hl');a.style.cssText=`left:${x}%;top:${y}%;width:${ww}%;height:${h}%`;a.dataset.t=t;a.href=typeof t==='string'?t:'#';a.title=typeof t==='string'?t:'Go to page '+(t+1);pg.append(a)})}
@@ -403,7 +404,7 @@ function docsPane(tab){
   const hd=el('div','dhead',tab.docs.length>1?'<button class="dback">← All documents</button>':'');hd.append(el('b','',esc(d.t)));
   if(tab.docs.length>1)$('.dback',hd).onclick=()=>{view.hidden=true;grid.hidden=false;activeViewer=null};
   const st=el('div','istage');
-  if(d.p)st.append(viewer(d.p,undefined,undefined,undefined,d.dl,d.w||(d.p.length===1&&!/\.(mp4|mov|webm|m4v)$/i.test(d.p[0].s||'')),d.t,d.dlt));
+  if(d.p)st.append(viewer(d.p,undefined,undefined,undefined,d.dl,d.w||(d.p.length===1&&!/\.(mp4|mov|webm|m4v)$/i.test(d.p[0].s||'')),d.t,d.dlt,d.nodl));
   else if(canEmbed(d.u))st.append(viewer([],gEmbed(d.u),d.u));
   else st.append(media({type:'link',src:d.u,title:d.t}));
   view.append(hd,st)};
