@@ -232,6 +232,64 @@ def fp_split(ctx, fid):
         for fm in forms: out.setdefault(fm, []).extend(docs)
     return out
 
+def sample_sites(res):
+    """Student sample WEBSITES kept in the repo as samples/pack1/<site name>/index.html (with its pages, css and images beside it).
+       samples/pack1/<site>        -> shown in Pack 1 Student Samples on every media form
+       samples/pack1/video/<site>  -> shown for Video only (a folder named after a media form)"""
+    out = {}
+    base = os.path.join(ROOT, 'samples')
+    if not os.path.isdir(base): return out
+    def title_of_site(d, name):
+        try:   # a title.txt beside index.html overrides the page title
+            t = open(os.path.join(d, 'title.txt'), encoding='utf-8').read().strip()
+            if t: return t
+        except Exception: pass
+        try:
+            m = re.search(r'<title>(.*?)</title>', open(os.path.join(d, 'index.html'), encoding='utf-8', errors='ignore').read(), re.S | re.I)
+            if m and m.group(1).strip(): return re.sub(r'\s+', ' ', m.group(1)).strip()
+        except Exception: pass
+        return re.sub(r'[-_]+', ' ', name).strip().title()
+    def thumb_of(d, key):
+        txt = ''
+        for fn in ['index.html'] + sorted(f for f in os.listdir(d) if f.endswith('.html') and f != 'index.html'):
+            try: txt += open(os.path.join(d, fn), encoding='utf-8', errors='ignore').read()
+            except Exception: pass
+        m = re.search(r"(?:src=|url\()[\"']?([^\"')\s>]+\.(?:jpe?g|png|webp))", txt, re.I)
+        if not m: return None
+        src = os.path.join(d, m.group(1))
+        if not os.path.isfile(src): return None
+        os.makedirs(OUT_DIR, exist_ok=True)
+        dst = os.path.join(OUT_DIR, 'site-%s-th.jpg' % key)
+        try:
+            from PIL import Image
+            im = Image.open(src).convert('RGB'); im.thumbnail((500, 500)); im.save(dst, quality=80)
+        except Exception:
+            return os.path.relpath(src, ROOT).replace(os.sep, '/')
+        return 'assets/dd/' + os.path.basename(dst)
+    def add(n, form, d, name):
+        key = re.sub(r'[^\w]+', '-', '%s-%s' % (n, name)).strip('-')
+        rel = os.path.relpath(os.path.join(d, 'index.html'), ROOT).replace(os.sep, '/')
+        doc = dict(t=title_of_site(d, name), site=rel)
+        th = thumb_of(d, key)
+        if th: doc['th'] = th
+        out.setdefault(n, {}).setdefault(form, []).append(doc)
+        log.append('sample site: pack %s %s -> %s' % (n, form, rel))
+    for pk in sorted(os.listdir(base)):
+        m = re.match(r'pack\s*-?\s*(\d)', pk, re.I); d0 = os.path.join(base, pk)
+        if not m or not os.path.isdir(d0): continue
+        n = m.group(1)
+        for name in sorted(os.listdir(d0), key=ds.nkey):
+            d = os.path.join(d0, name)
+            if not os.path.isdir(d): continue
+            if os.path.isfile(os.path.join(d, 'index.html')): add(n, '*', d, name)
+            else:
+                forms = ds.parse_forms(name)
+                for sub in sorted(os.listdir(d), key=ds.nkey):
+                    d2 = os.path.join(d, sub)
+                    if forms and os.path.isfile(os.path.join(d2, 'index.html')):
+                        for fm in forms: add(n, fm, d2, sub)
+    return out
+
 def find_child(ctx, fid, pred):
     for k in ctx.drive.children(fid):
         k = ds.resolve(k)
@@ -296,7 +354,7 @@ SLIDES = []
 def build(drive, folders, root_id, fetch=fetch_default):
     ctx = Ctx(drive, fetch)
     del log[:]
-    res = dict(status='ok', td=[], cr=[], mc=[], cs=[], fp={}, c={}, pk={}, s={}, x={}, ap={}, sl={})
+    res = dict(status='ok', td=[], cr=[], mc=[], cs=[], fp={}, sm={}, c={}, pk={}, s={}, x={}, ap={}, sl={})
     shutil.rmtree(OUT_DIR, ignore_errors=True)
     def pick(key, names):
         fid = folders.get(key)
@@ -325,6 +383,7 @@ def build(drive, folders, root_id, fetch=fetch_default):
             log.append('%s: %d document(s)' % (key, cnt))
         except Exception as ex:
             res['status'] = 'error'; log.append('%s: ERROR %s' % (key, ex))
+    res['sm'] = sample_sites(res)
     for fid in SLIDES:   # Inspiration PDFs that should be flipped through as slides instead of scrolled
         try:
             d = item0(ctx, {'name': fid + '.pdf', 'id': fid, 'mimeType': 'application/pdf'})
@@ -350,7 +409,9 @@ def main():
     drive = ds.Drive(key) if key else ds.PublicDrive()
     try: res = build(drive, folders, os.environ.get('DRIVE_ROOT_FOLDER_ID'))
     except Exception as ex:
-        res = dict(status='error', td=[], cr=[], mc=[], cs=[], fp={}, c={}, pk={}, s={}, x={}, ap={}, sl={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
+        res = dict(status='error', td=[], cr=[], mc=[], cs=[], fp={}, sm={}, c={}, pk={}, s={}, x={}, ap={}, sl={}); log.append('GOOGLE DRIVE ERROR (documents): %s' % ex)
+        try: res['sm'] = sample_sites(res)
+        except Exception: pass
     res['log'] = log[:60]
     try:   # stamp the page so browsers always fetch the newest data
         ip = os.path.join(ROOT, 'index.html'); h = open(ip, encoding='utf-8').read()
